@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Bahasa Indonesia Kelas X</title>
+    <!-- Memuat Tailwind CSS untuk styling yang cepat dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .question-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 0.75rem;
+            text-align: left;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            background-color: #ffffff;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+        }
+        .option-button:hover:not(.disabled):not(.correct):not(.incorrect) {
+            background-color: #eff6ff;
+            border-color: #60a5fa;
+        }
+        .option-button.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+            font-weight: 600;
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+            font-weight: 600;
+        }
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .explanation.correct-bg {
+            background-color: #d1fae5;
+            border-left: 5px solid #10b981;
+        }
+        .explanation.incorrect-bg {
+            background-color: #fee2e2;
+            border-left: 5px solid #ef4444;
+        }
+        .submit-btn {
+            background-color: #4f46e5;
+            color: white;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .submit-btn:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="container mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-2">Quiz Bahasa Indonesia Kelas X</h1>
+            <p class="text-lg text-gray-600">50 Soal Latihan: LHO, Anekdot, dan Hikayat (Bab 1-3)</p>
+        </header>
+
+        <div id="quiz-container">
+            <!-- Soal akan dimuat di sini oleh JavaScript -->
+        </div>
+
+        <div id="results-container" class="hidden text-center question-card">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Hasil Kuis Anda</h2>
+            <p class="text-6xl font-extrabold text-indigo-600 mb-6" id="score-display">0/50</p>
+            <p class="text-xl text-gray-700 mb-8" id="feedback-message"></p>
+            <button onclick="resetQuiz()" class="submit-btn">Ulangi Kuis</button>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-2xl flex justify-between items-center z-10">
+            <div class="text-sm font-semibold text-gray-600">
+                Soal <span id="current-question-number">1</span> dari <span id="total-questions">50</span>
+            </div>
+            <button onclick="nextQuestion()" class="submit-btn" id="next-button">Selanjutnya</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Kumpulan 50 Soal Latihan
+        const questions = [
+            // BAGIAN 1: TEKS LAPORAN HASIL OBSERVASI (LHO)
+            {
+                q: "Teks laporan hasil observasi adalah teks yang berfungsi untuk...",
+                options: [
+                    { text: "Menceritakan pengalaman pribadi penulis", correct: false, rationale: "Fungsi ini lebih cocok untuk teks narasi atau autobiografi." },
+                    { text: "Menjelaskan langkah-langkah melakukan sesuatu", correct: false, rationale: "Ini adalah fungsi dari teks prosedur." },
+                    { text: "Memberikan informasi tentang suatu objek atau situasi setelah diadakannya investigasi/penelitian secara sistematis", correct: true, rationale: "LHO bertujuan menyajikan fakta-fakta yang telah terbukti kebenarannya melalui pengamatan yang sistematis." },
+                    { text: "Menghibur pembaca dengan cerita rekaan", correct: false, rationale: "Fungsi ini adalah tujuan dari teks fiksi, seperti cerpen atau novel." },
+                ],
+                explanation: "Teks laporan hasil observasi (LHO) bersifat informatif dan objektif. Tujuannya adalah menyajikan fakta-fakta yang telah terbukti kebenarannya melalui pengamatan (observasi)."
+            },
+            {
+                q: "Struktur teks laporan hasil observasi secara umum terdiri atas...",
+                options: [
+                    { text: "Orientasi, komplikasi, resolusi", correct: false, rationale: "Ini adalah struktur teks naratif atau fiksi." },
+                    { text: "Pernyataan umum, deskripsi bagian, deskripsi manfaat", correct: true, rationale: "Struktur LHO meliputi klasifikasi objek (Pernyataan Umum), penjelasan detail (Deskripsi Bagian), dan kegunaan (Deskripsi Manfaat)." },
+                    { text: "Tesis, argumentasi, penegasan ulang", correct: false, rationale: "Ini adalah struktur teks eksposisi atau persuasi." },
+                    { text: "Pembukaan, isi, penutup", correct: false, rationale: "Ini adalah struktur umum tulisan, bukan spesifik LHO." },
+                ],
+                explanation: "Struktur teks LHO sesuai Bab 1 buku paket terdiri dari Pernyataan Umum (klasifikasi), Deskripsi Bagian (penjelasan detail), dan Deskripsi Manfaat/Simpulan."
+            },
+            {
+                q: "Perhatikan kalimat berikut: 'Belalang anggrek (Hymenopus coronatus) adalah salah satu jenis belalang sentadu yang hidup di Indonesia dan kawasan Asia Tenggara lainnya.' Kalimat di atas termasuk jenis kalimat...",
+                options: [
+                    { text: "Deskripsi", correct: false, rationale: "Kalimat deskripsi menjelaskan ciri fisik atau sifat yang dapat dirasakan pancaindra." },
+                    { text: "Definisi", correct: true, rationale: "Kalimat definisi menjelaskan pengertian umum suatu objek dan biasanya menggunakan verba kopula seperti 'adalah', 'merupakan', atau 'yaitu'." },
+                    { text: "Kompleks", correct: false, rationale: "Kalimat ini hanya memiliki satu klausa, sehingga termasuk simpleks." },
+                    { text: "Imperatif", correct: false, rationale: "Kalimat imperatif adalah kalimat perintah." },
+                ],
+                explanation: "Kalimat definisi menjelaskan pengertian umum suatu objek dan biasanya menggunakan verba kopula seperti *adalah, merupakan, yaitu*."
+            },
+            {
+                q: "Manakah di bawah ini yang merupakan kalimat deskripsi?",
+                options: [
+                    { text: "Wayang adalah seni pertunjukan yang telah ditetapkan sebagai warisan budaya asli Indonesia.", correct: false, rationale: "Ini adalah kalimat definisi." },
+                    { text: "Wayang golek adalah wayang yang menggunakan boneka kayu.", correct: false, rationale: "Ini adalah kalimat definisi." },
+                    { text: "Tubuh belalang anggrek berwarna putih dengan aksen merah muda lembut.", correct: true, rationale: "Kalimat deskripsi menggambarkan ciri-ciri khusus suatu benda (warna, bentuk) yang dapat ditangkap pancaindra." },
+                    { text: "Wayang topeng dimainkan oleh orang yang menggunakan topeng.", correct: false, rationale: "Ini lebih cenderung menjadi kalimat fakta atau definisi jenis wayang." },
+                ],
+                explanation: "Kalimat deskripsi menggambarkan sifat-sifat atau ciri-ciri khusus suatu benda (warna, ukuran, bentuk) yang dapat ditangkap pancaindra."
+            },
+            {
+                q: "Penulisan kata berimbuhan *di-* dan kata depan *di* yang tepat terdapat pada kalimat...",
+                options: [
+                    { text: "Buku itu di simpan di atas meja.", correct: false, rationale: "Kata 'di simpan' seharusnya ditulis serangkai karena merupakan imbuhan kata kerja pasif." },
+                    { text: "Sampah plastik sebaiknya dibuang ditempat sampah.", correct: false, rationale: "Kata 'ditempat' seharusnya ditulis terpisah karena menunjukkan keterangan tempat." },
+                    { text: "Bunga anggrek di tanam di pot kecil.", correct: false, rationale: "Kata 'di tanam' seharusnya ditulis serangkai karena merupakan imbuhan kata kerja pasif." },
+                    { text: "Belalang anggrek dapat ditemukan di hutan hujan tropis.", correct: true, rationale: "Penulisan 'ditemukan' (imbuhan) sudah benar serangkai, dan 'di hutan' (kata depan) sudah benar terpisah." },
+                ],
+                explanation: "Kata depan *di* (menunjukkan tempat) ditulis terpisah, sedangkan imbuhan *di-* (membentuk kata kerja pasif) ditulis serangkai. Opsi D memenuhi kaidah ini."
+            },
+            {
+                q: "Kata 'pertunjukan' dalam kalimat 'Wayang adalah seni pertunjukan...' berasal dari kata dasar...",
+                options: [
+                    { text: "Pertunjuk", correct: false, rationale: "Ini bukan kata dasar yang baku." },
+                    { text: "Unjuk", correct: false, rationale: "Meskipun terkait, kata 'pertunjukan' lebih sering dianggap berdasar pada 'tunjuk' dengan konfiks 'per-an'." },
+                    { text: "Tunjukan", correct: false, rationale: "Ini adalah bentuk kata kerja dengan sufiks -kan." },
+                    { text: "Tunjuk", correct: true, rationale: "Kata dasar dari 'pertunjukan' adalah 'tunjuk', yang mendapat konfiks 'per-an'." },
+                ],
+                explanation: "Kata dasar dari *pertunjukan* adalah *tunjuk*, yang mendapat konfiks *per-an*."
+            },
+            {
+                q: "Perhatikan kalimat berikut: 'Taman Nasional Baluran merupakan perwakilan ekosistem hutan spesifik kering di Pulau Jawa.' Kalimat tersebut termasuk kalimat...",
+                options: [
+                    { text: "Kompleks setara", correct: false, rationale: "Kalimat ini tidak memiliki dua klausa yang setara." },
+                    { text: "Kompleks bertingkat", correct: false, rationale: "Kalimat ini tidak memiliki klausa utama dan klausa bawahan." },
+                    { text: "Simpleks", correct: true, rationale: "Kalimat simpleks (tunggal) hanya memiliki satu predikat (merupakan) atau satu klausa." },
+                    { text: "Majemuk campuran", correct: false, rationale: "Ini adalah gabungan kompleks dan setara, yang tidak berlaku di sini." },
+                ],
+                explanation: "Kalimat simpleks (tunggal) hanya memiliki satu predikat atau satu klausa. Kalimat di atas memiliki pola Subjek-Predikat-Pelengkap."
+            },
+            {
+                q: "Cara penulisan kutipan tidak langsung yang tepat (menggunakan format Nama Belakang, Tahun) adalah...",
+                options: [
+                    { text: "Menurut (Keraf, 1994), argumentasi adalah...", correct: false, rationale: "Format ini tidak lengkap dan penempatannya kurang tepat." },
+                    { text: "Argumentasi adalah... (Keraf, 1994: 3).", correct: true, rationale: "Format Nama Belakang, Tahun: Halaman adalah umum untuk kutipan tidak langsung yang diletakkan di akhir kalimat." },
+                    { text: "Keraf (1994) menyatakan bahwa argumentasi adalah...", correct: false, rationale: "Ini benar secara umum, tetapi opsi B lebih ringkas dan sesuai dengan format standar akhir kalimat." },
+                    { text: "Argumentasi bertujuan untuk membuktikan kebenaran (Keraf 1994, 3).", correct: false, rationale: "Meskipun formatnya mirip, penggunaan tanda baca seringkali menggunakan titik dua (:) sebelum halaman." },
+                ],
+                explanation: "Format kutipan tidak langsung yang umum diletakkan di akhir kalimat adalah (Nama Belakang, Tahun: Halaman)."
+            },
+            {
+                q: "Susunan daftar pustaka yang tepat untuk buku berjudul *Komposisi* karangan Gorys Keraf yang diterbitkan oleh Nusa Indah di Ende pada tahun 1994 adalah...",
+                options: [
+                    { text: "Gorys Keraf. 1994. *Komposisi*. Ende: Nusa Indah.", correct: false, rationale: "Nama penulis harus dibalik (Keraf, Gorys)." },
+                    { text: "Keraf, Gorys. 1994. *Komposisi*. Ende: Nusa Indah.", correct: true, rationale: "Rumus umum: Nama (dibalik). Tahun. *Judul Buku (miring)*. Kota: Penerbit." },
+                    { text: "Keraf, Gorys. *Komposisi*. 1994. Nusa Indah: Ende.", correct: false, rationale: "Urutan tahun dan kota/penerbit tidak tepat." },
+                    { text: "Keraf, Gorys. 1994. *Komposisi*. Nusa Indah: Ende.", correct: false, rationale: "Urutan Kota dan Penerbit harusnya Kota: Penerbit (Ende: Nusa Indah)." },
+                ],
+                explanation: "Rumus umum penulisan daftar pustaka: Nama (dibalik). Tahun. *Judul Buku*. Kota: Penerbit."
+            },
+            {
+                q: "Tujuan utama pembuatan teks laporan hasil observasi adalah...",
+                options: [
+                    { text: "Menyajikan hiburan", correct: false, rationale: "Ini tujuan teks fiksi." },
+                    { text: "Memengaruhi pembaca", correct: false, rationale: "Ini tujuan teks persuasi." },
+                    { text: "Menyajikan informasi fakta secara objektif", correct: true, rationale: "LHO bertujuan memberikan informasi berdasarkan fakta yang diperoleh dari pengamatan langsung (objektif)." },
+                    { text: "Menyampaikan opini penulis", correct: false, rationale: "LHO harus bersifat objektif, bukan opini." },
+                ],
+                explanation: "LHO bertujuan untuk memberikan informasi tentang suatu objek atau situasi berdasarkan fakta yang diperoleh dari pengamatan langsung."
+            },
+            {
+                q: "Bagian teks laporan hasil observasi yang berisi penjelasan mengenai kegunaan atau fungsi objek yang diamati disebut...",
+                options: [
+                    { text: "Pernyataan umum", correct: false, rationale: "Pernyataan umum berisi klasifikasi atau definisi objek." },
+                    { text: "Deskripsi bagian", correct: false, rationale: "Deskripsi bagian berisi rincian atau aspek-aspek objek." },
+                    { text: "Deskripsi manfaat", correct: true, rationale: "Deskripsi manfaat menjelaskan kegunaan atau fungsi dari objek yang diobservasi." },
+                    { text: "Orientasi", correct: false, rationale: "Orientasi adalah istilah untuk teks narasi." },
+                ],
+                explanation: "Deskripsi manfaat menjelaskan manfaat atau kegunaan dari objek yang diobservasi."
+            },
+            {
+                q: "Urutan langkah-langkah yang tepat dalam menyusun teks laporan hasil observasi adalah...",
+                options: [
+                    { text: "Menentukan objek, membuat kerangka, observasi, mengembangkan kerangka, menyunting.", correct: false, rationale: "Observasi harus dilakukan sebelum membuat kerangka yang didasarkan pada data." },
+                    { text: "Menentukan objek, observasi, membuat kerangka, mengembangkan teks, menyunting.", correct: true, rationale: "Langkah logisnya adalah menentukan objek, mengumpulkan data (observasi), menyusun kerangka, menulis draf, dan menyunting." },
+                    { text: "Observasi, membuat kerangka, menentukan objek, mengembangkan teks, menyunting.", correct: false, rationale: "Objek harus ditentukan dahulu sebelum observasi." },
+                    { text: "Mengembangkan teks, observasi, membuat kerangka, menentukan objek, menyunting.", correct: false, rationale: "Mengembangkan teks adalah langkah terakhir sebelum menyunting." },
+                ],
+                explanation: "Urutan yang tepat: Tentukan objek -> Observasi -> Buat Kerangka -> Kembangkan Teks -> Sunting."
+            },
+            {
+                q: "Bacalah kutipan teks berikut: 'Kunang-kunang hidup di tempat-tempat lembab, seperti rawa-rawa dan daerah yang dipenuhi pepohonan.' Kalimat yang **tidak sesuai** dengan fakta di atas adalah...",
+                options: [
+                    { text: "Kunang-kunang menyukai tempat lembab.", correct: false, rationale: "Ini sesuai dengan teks ('tempat-tempat lembab')." },
+                    { text: "Hutan yang banyak pohon bisa menjadi habitat kunang-kunang.", correct: false, rationale: "Ini sesuai dengan teks ('daerah yang dipenuhi pepohonan')." },
+                    { text: "Kunang-kunang hidup di daerah kering dan tandus.", correct: true, rationale: "Ini bertentangan dengan fakta di teks yang menyebutkan kunang-kunang hidup di tempat lembab." },
+                    { text: "Rawa-rawa adalah salah satu habitat kunang-kunang.", correct: false, rationale: "Ini sesuai dengan teks ('rawa-rawa')." },
+                ],
+                explanation: "Teks menyatakan kunang-kunang hidup di tempat lembab, sehingga pernyataan bahwa mereka hidup di daerah kering dan tandus bertentangan."
+            },
+            {
+                q: "Kata yang menunjukkan tindakan fisik yang dapat dilihat disebut...",
+                options: [
+                    { text: "Verba tingkah laku", correct: false, rationale: "Ini adalah verba yang mengacu pada sikap, tidak selalu aksi fisik yang kasat mata." },
+                    { text: "Verba material", correct: true, rationale: "Verba material (kata kerja aksi) adalah kata kerja yang menunjukkan perbuatan fisik atau peristiwa yang dapat dilihat, seperti 'menulis' atau 'memukul'." },
+                    { text: "Verba mental", correct: false, rationale: "Verba mental menunjukkan reaksi batin, seperti 'memikirkan' atau 'merasakan'." },
+                    { text: "Verba relasional", correct: false, rationale: "Verba relasional berfungsi sebagai penghubung antara subjek dan pelengkap, seperti 'adalah' atau 'merupakan'." },
+                ],
+                explanation: "Verba material adalah kata kerja yang menunjukkan perbuatan fisik atau peristiwa, contoh: *menulis, memukul, terbang*."
+            },
+            {
+                q: "Yang dimaksud dengan nomina adalah...",
+                options: [
+                    { text: "Kata kerja", correct: false, rationale: "Kata kerja disebut verba." },
+                    { text: "Kata sifat", correct: false, rationale: "Kata sifat disebut adjektiva." },
+                    { text: "Kata benda", correct: true, rationale: "Nomina adalah kata benda." },
+                    { text: "Kata keterangan", correct: false, rationale: "Kata keterangan disebut adverbia." },
+                ],
+                explanation: "Nomina adalah kata benda (kata yang mengacu pada orang, tempat, atau benda, baik abstrak maupun konkret)."
+            },
+
+            // BAGIAN 2: TEKS ANEKDOT
+            {
+                q: "Teks anekdot adalah cerita singkat yang menarik karena lucu dan mengesankan, yang memiliki tujuan utama untuk...",
+                options: [
+                    { text: "Menghibur semata tanpa makna tersembunyi.", correct: false, rationale: "Ini adalah tujuan humor biasa." },
+                    { text: "Menyampaikan kritik atau sindiran halus terhadap tokoh/fenomena publik.", correct: true, rationale: "Ciri khas anekdot adalah adanya unsur kritik sosial yang disampaikan secara humoris." },
+                    { text: "Menjelaskan prosedur atau langkah-langkah kerja.", correct: false, rationale: "Ini adalah tujuan teks prosedur." },
+                    { text: "Menggambarkan objek secara detail dan objektif.", correct: false, rationale: "Ini adalah tujuan teks laporan observasi." },
+                ],
+                explanation: "Ciri utama yang membedakan anekdot dengan humor biasa adalah adanya unsur kritik atau sindiran terhadap fenomena sosial atau tokoh publik."
+            },
+            {
+                q: "Perbedaan utama antara humor dan anekdot terletak pada...",
+                options: [
+                    { text: "Kelucuan yang disajikan.", correct: false, rationale: "Keduanya sama-sama lucu." },
+                    { text: "Panjang cerita.", correct: false, rationale: "Keduanya sama-sama cerita singkat." },
+                    { text: "Fungsi/tujuan (adanya kritik sosial).", correct: true, rationale: "Humor bertujuan menghibur, sedangkan anekdot bertujuan mengkritik melalui humor." },
+                    { text: "Tokoh yang terlibat (harus orang penting).", correct: false, rationale: "Anekdot sering melibatkan orang penting, tetapi bukan pembeda utama dari humor." },
+                ],
+                explanation: "Humor bertujuan hanya untuk menghibur, sedangkan anekdot bertujuan untuk menyampaikan kritik sosial atau pesan moral melalui humor."
+            },
+            {
+                q: "Struktur teks anekdot yang berisi pengenalan kondisi atau karakter tokoh dan gambaran tentang masalah yang akan dihadapi disebut...",
+                options: [
+                    { text: "Komplikasi", correct: false, rationale: "Komplikasi adalah bagian munculnya masalah." },
+                    { text: "Orientasi", correct: true, rationale: "Orientasi adalah bagian awal yang mengenalkan tokoh, latar, dan situasi awal sebelum masalah muncul." },
+                    { text: "Evaluasi", correct: false, rationale: "Evaluasi adalah tanggapan terhadap masalah." },
+                    { text: "Reaksi", correct: false, rationale: "Reaksi adalah cara tokoh menyelesaikan masalah." },
+                ],
+                explanation: "Orientasi adalah bagian awal yang mengenalkan tokoh, latar, dan situasi awal sebelum masalah muncul."
+            },
+            {
+                q: "Bagian yang berisi masalah yang dihadapi tokoh atau puncak cerita yang mengundang tawa sekaligus kritikan disebut...",
+                options: [
+                    { text: "Orientasi", correct: false, rationale: "Orientasi adalah pengenalan situasi awal." },
+                    { text: "Komplikasi (Krisis)", correct: true, rationale: "Komplikasi atau krisis adalah inti dari anekdot di mana masalah atau kejadian lucu/janggal terjadi." },
+                    { text: "Koda", correct: false, rationale: "Koda adalah penutup atau simpulan." },
+                    { text: "Abstraksi", correct: false, rationale: "Abstraksi adalah inti cerita sebelum orientasi." },
+                ],
+                explanation: "Komplikasi (atau Krisis) adalah inti dari anekdot di mana masalah atau kejadian lucu/janggal terjadi."
+            },
+            {
+                q: "Contoh kalimat pertanyaan retoris yang sering digunakan dalam anekdot adalah...",
+                options: [
+                    { text: "Apakah kamu sudah makan siang?", correct: false, rationale: "Ini adalah pertanyaan yang membutuhkan jawaban konkret." },
+                    { text: "Jam berapa sekarang di Jakarta?", correct: false, rationale: "Ini adalah pertanyaan yang membutuhkan jawaban konkret." },
+                    { text: "Siapa yang tidak ingin hidup bahagia dan sejahtera?", correct: true, rationale: "Pertanyaan retoris tidak memerlukan jawaban karena jawabannya sudah jelas dan digunakan untuk menyindir atau menegaskan." },
+                    { text: "Di mana letak Ibu Kota negara baru?", correct: false, rationale: "Ini adalah pertanyaan faktual." },
+                ],
+                explanation: "Pertanyaan retoris adalah pertanyaan yang tidak memerlukan jawaban karena jawabannya sudah jelas atau diketahui umum, sering digunakan untuk menyindir."
+            },
+            {
+                q: "Pernyataan: 'Wah, tulisanmu bagus sekali, sampai-sampai tidak ada satu pun huruf yang bisa kubaca.' Kalimat di atas menggunakan majas...",
+                options: [
+                    { text: "Sarkasme", correct: false, rationale: "Sarkasme lebih kasar dan langsung." },
+                    { text: "Ironi", correct: true, rationale: "Ironi mengungkapkan sebaliknya dari apa yang dimaksud dengan tujuan menyindir secara halus." },
+                    { text: "Metafora", correct: false, rationale: "Metafora adalah perbandingan tidak langsung." },
+                    { text: "Personifikasi", correct: false, rationale: "Personifikasi melekkatkan sifat manusia pada benda mati." },
+                ],
+                explanation: "Ironi mengungkapkan sebaliknya dari apa yang dimaksud dengan tujuan menyindir secara halus."
+            },
+            {
+                q: "Majas sindiran yang paling kasar dan menyerang secara langsung disebut...",
+                options: [
+                    { text: "Ironi", correct: false, rationale: "Ironi adalah sindiran halus." },
+                    { text: "Sinisme", correct: false, rationale: "Sinisme lebih tajam dari ironi tetapi tidak sekeras sarkasme." },
+                    { text: "Sarkasme", correct: true, rationale: "Sarkasme adalah sindiran kasar yang menyakitkan hati." },
+                    { text: "Satire", correct: false, rationale: "Satire adalah kritik dalam bentuk fiksi atau puisi." },
+                ],
+                explanation: "Sarkasme adalah sindiran kasar yang menyakitkan hati."
+            },
+            {
+                q: "Bacalah teks singkat: 'Seorang pejabat ditanya, 'Pak, kenapa jalan di daerah ini rusak parah?' Pejabat menjawab, 'Itu agar pengendara tidak ngebut dan lebih berhati-hati.' Sindiran yang terdapat dalam teks tersebut ditujukan kepada...",
+                options: [
+                    { text: "Pengendara yang suka ngebut.", correct: false, rationale: "Pengendara hanya menjadi objek penderita." },
+                    { text: "Masyarakat yang kurang berhati-hati.", correct: false, rationale: "Masyarakat hanya menjadi objek penderita." },
+                    { text: "Pejabat yang pandai mencari alasan atas kelalaian kerjanya.", correct: true, rationale: "Anekdot ini menyindir pejabat yang tidak mau mengakui kegagalan pembangunan infrastruktur dan malah membuat alasan tidak logis." },
+                    { text: "Pembuat jalan yang tidak kompeten.", correct: false, rationale: "Sindiran lebih fokus pada pejabat yang memberi alasan." },
+                ],
+                explanation: "Anekdot ini menyindir pejabat yang tidak mau mengakui kegagalan pembangunan infrastruktur dan malah membuat alasan yang tidak logis."
+            },
+            {
+                q: "Kata kerja material (aksi) yang mungkin muncul dalam teks anekdot adalah...",
+                options: [
+                    { text: "Memikirkan", correct: false, rationale: "Ini adalah verba mental." },
+                    { text: "Merasakan", correct: false, rationale: "Ini adalah verba mental." },
+                    { text: "Memukul", correct: true, rationale: "Memukul adalah tindakan fisik yang dapat dilihat (verba material)." },
+                    { text: "Menyayangi", correct: false, rationale: "Ini adalah verba mental." },
+                ],
+                explanation: "Verba material adalah kata kerja yang menunjukkan perbuatan fisik atau peristiwa yang dapat dilihat, seperti *memukul*."
+            },
+            {
+                q: "Agar kritik yang disampaikan dalam anekdot (atau lawakan tunggal) akurat dan bertanggung jawab, sebaiknya didasarkan pada...",
+                options: [
+                    { text: "Imajinasi penulis semata.", correct: false, rationale: "Kritik tanpa dasar cenderung tidak relevan." },
+                    { text: "Fakta atau data yang valid tentang fenomena sosial.", correct: true, rationale: "Kritik sosial yang baik harus berbasis data atau fakta yang terjadi di masyarakat agar relevan dan konstruktif." },
+                    { text: "Gosip yang beredar di media sosial.", correct: false, rationale: "Gosip tidak dapat dijadikan dasar kritik yang bertanggung jawab." },
+                    { text: "Cerita fiksi yang sedang populer.", correct: false, rationale: "Cerita fiksi tidak selalu mencerminkan kondisi riil." },
+                ],
+                explanation: "Kritik sosial yang baik harus berbasis data atau fakta yang terjadi di masyarakat agar relevan dan konstruktif."
+            },
+
+            // BAGIAN 3: HIKAYAT DAN CERPEN
+            {
+                q: "Hikayat merupakan karya sastra lama Melayu yang berfungsi sebagai...",
+                options: [
+                    { text: "Materi debat publik.", correct: false, rationale: "Fungsi ini tidak relevan dengan hikayat." },
+                    { text: "Sarana kritik politik praktis.", correct: false, rationale: "Hikayat bukan alat kritik politik modern." },
+                    { text: "Pelipur lara, pembangkit semangat juang, dan sarana pendidikan.", correct: true, rationale: "Sesuai definisi, fungsi hikayat adalah menghibur (pelipur lara) dan membangkitkan semangat." },
+                    { text: "Panduan teknis dan manual.", correct: false, rationale: "Fungsi ini adalah tujuan dari teks prosedur atau instruksi." },
+                ],
+                explanation: "Sesuai definisi di buku paket dan materi hikayat, fungsi utamanya adalah menghibur (pelipur lara) dan membangkitkan semangat."
+            },
+            {
+                q: "Ciri hikayat yang menceritakan kehidupan seputar kerajaan, raja-raja, dan keluarganya disebut...",
+                options: [
+                    { text: "Anonim", correct: false, rationale: "Anonim berarti tidak diketahui pengarangnya." },
+                    { text: "Arkais", correct: false, rationale: "Arkais berarti menggunakan kata-kata kuno." },
+                    { text: "Istanasentris", correct: true, rationale: "Istanasentris berarti berpusat pada istana (kehidupan kerajaan)." },
+                    { text: "Magis", correct: false, rationale: "Magis berarti mengandung unsur kesaktian/sihir." },
+                ],
+                explanation: "Istanasentris berarti berpusat pada istana (kehidupan kerajaan)."
+            },
+            {
+                q: "Hikayat bersifat anonim, artinya...",
+                options: [
+                    { text: "Menceritakan kesaktian para tokoh.", correct: false, rationale: "Ini adalah ciri magis/kesaktian tokoh." },
+                    { text: "Menggunakan bahasa Melayu klasik.", correct: false, rationale: "Ini adalah ciri arkais." },
+                    { text: "Tidak diketahui nama pengarangnya secara jelas.", correct: true, rationale: "Anonim berarti tanpa nama pengarang yang jelas karena cerita disampaikan secara lisan turun-temurun." },
+                    { text: "Milik masyarakat secara bersama.", correct: false, rationale: "Ini adalah ciri komunal, yang berkorelasi dengan anonim." },
+                ],
+                explanation: "Anonim berarti tidak diketahui nama pengarangnya secara jelas karena cerita disampaikan secara lisan turun-temurun."
+            },
+            {
+                q: "Kata-kata seperti *syahdan, hatta, sebermula, titah*, dan *upeti* yang sering ditemukan dalam hikayat disebut kata...",
+                options: [
+                    { text: "Populer", correct: false, rationale: "Kata populer adalah kata yang umum digunakan saat ini." },
+                    { text: "Slang", correct: false, rationale: "Slang adalah bahasa tidak baku yang musiman." },
+                    { text: "Arkais", correct: true, rationale: "Kata arkais adalah kata-kata kuno yang sudah jarang atau tidak lagi digunakan dalam komunikasi sehari-hari masa kini." },
+                    { text: "Baku", correct: false, rationale: "Baku adalah kata yang sesuai kaidah bahasa." },
+                ],
+                explanation: "Kata arkais adalah kata-kata kuno yang sudah jarang atau tidak lagi digunakan dalam komunikasi sehari-hari masa kini."
+            },
+            {
+                q: "Kata penghubung (konjungsi) arkais yang sering digunakan di awal kalimat atau paragraf dalam hikayat, yang berarti 'lalu' atau 'kemudian' adalah...",
+                options: [
+                    { text: "Bahwa", correct: false, rationale: "Bahwa adalah konjungsi penjelas." },
+                    { text: "Atau", correct: false, rationale: "Atau adalah konjungsi pilihan." },
+                    { text: "Hatta", correct: true, rationale: "Hatta (artinya: lalu, kemudian, maka) adalah konjungsi urutan waktu khas Melayu Klasik." },
+                    { text: "Karena", correct: false, rationale: "Karena adalah konjungsi sebab-akibat." },
+                ],
+                explanation: "*Hatta* (artinya: lalu, kemudian, maka) adalah konjungsi urutan waktu khas Melayu Klasik."
+            },
+            {
+                q: "Salah satu ciri hikayat adalah kemustahilan. Contoh kemustahilan dalam cerita adalah...",
+                options: [
+                    { text: "Raja berburu ke hutan dan bertemu putri.", correct: false, rationale: "Ini adalah hal yang mungkin terjadi dalam cerita fiksi." },
+                    { text: "Seorang putri yang sangat cantik jelita.", correct: false, rationale: "Kecantikan adalah hiperbola, tetapi bukan kemustahilan logis." },
+                    { text: "Bayi lahir disertai pedang dan panah, atau tokoh dapat terbang.", correct: true, rationale: "Kemustahilan adalah hal yang tidak logis atau tidak bisa dinalar di dunia nyata, seperti bayi lahir membawa senjata atau manusia terbang." },
+                    { text: "Rakyat patuh pada raja yang adil.", correct: false, rationale: "Ini adalah hal yang realistis." },
+                ],
+                explanation: "Kemustahilan adalah hal yang tidak logis atau tidak bisa dinalar, seperti bayi lahir langsung membawa senjata."
+            },
+            {
+                q: "Contoh kutipan yang menunjukkan kesaktian tokoh dalam hikayat adalah...",
+                options: [
+                    { text: "Raja memimpin rakyatnya dengan adil dan bijaksana.", correct: false, rationale: "Ini adalah nilai moral/kepemimpinan." },
+                    { text: "Indera Bangsawan mencari buluh perindu di hutan.", correct: false, rationale: "Ini adalah adegan petualangan." },
+                    { text: "Syah Peri terbang dan mengalahkan Garuda raksasa.", correct: true, rationale: "Tokoh manusia (Syah Peri) yang bisa terbang dan mengalahkan makhluk mitologi menunjukkan kesaktian (hal supranatural)." },
+                    { text: "Putri raja menenun kain yang indah.", correct: false, rationale: "Ini adalah kegiatan biasa." },
+                ],
+                explanation: "Kesaktian ditunjukkan melalui kemampuan tokoh yang melebihi batas kemampuan manusia biasa, seperti terbang atau mengalahkan makhluk raksasa."
+            },
+            {
+                q: "Hikayat sering menggunakan alur berbingkai. Yang dimaksud dengan alur berbingkai adalah...",
+                options: [
+                    { text: "Cerita yang alurnya mundur (flashback).", correct: false, rationale: "Ini adalah alur mundur." },
+                    { text: "Di dalam cerita utama terdapat cerita lain yang dinarasikan oleh tokoh.", correct: true, rationale: "Alur berbingkai adalah struktur di mana ada cerita utama, dan di dalamnya tokoh bercerita lagi tentang kisah lain (cerita dalam cerita)." },
+                    { text: "Cerita yang hanya fokus pada satu konflik saja.", correct: false, rationale: "Ini adalah alur tunggal." },
+                    { text: "Cerita yang tidak memiliki akhir yang jelas.", correct: false, rationale: "Ini adalah cerita menggantung." },
+                ],
+                explanation: "Alur berbingkai adalah struktur di mana ada cerita utama, dan di dalamnya tokoh bercerita lagi tentang kisah lain (cerita dalam cerita), contohnya dalam *Hikayat Bayan Budiman*."
+            },
+            {
+                q: "Kutipan: 'Maka anakanda baginda yang dua orang itu pun sampailah usia tujuh tahun dan dititahkan pergi mengaji kepada Mualim Sufian. Sesudah tahu mengaji, mereka dititah pula mengaji kitab usul, fikih, hingga saraf, tafsir sekaliannya diketahuinya.' Nilai yang terkandung adalah...",
+                options: [
+                    { text: "Nilai sosial", correct: false, rationale: "Nilai sosial berkaitan dengan interaksi antar manusia." },
+                    { text: "Nilai budaya", correct: false, rationale: "Nilai budaya berkaitan dengan adat istiadat." },
+                    { text: "Nilai pendidikan", correct: true, rationale: "Kutipan menceritakan proses belajar (mengaji berbagai ilmu) yang merupakan representasi nilai pendidikan." },
+                    { text: "Nilai estetika", correct: false, rationale: "Nilai estetika berkaitan dengan keindahan." },
+                ],
+                explanation: "Kutipan menceritakan proses belajar (mengaji berbagai ilmu) yang merupakan representasi nilai pendidikan."
+            },
+            {
+                q: "Kutipan: 'Janganlah engkau berbuat jahat terhadap sesama manusia, karena perbuatan jahat akan mendatangkan celaka bagi dirimu sendiri.' Nilai dominan dalam kutipan tersebut adalah...",
+                options: [
+                    { text: "Nilai agama", correct: false, rationale: "Nilai agama berkaitan dengan hubungan manusia-Tuhan." },
+                    { text: "Nilai moral", correct: true, rationale: "Nilai moral berkaitan dengan nasihat tentang baik dan buruknya perilaku manusia (etika)." },
+                    { text: "Nilai budaya", correct: false, rationale: "Nilai budaya berkaitan dengan adat istiadat." },
+                    { text: "Nilai ekonomi", correct: false, rationale: "Nilai ekonomi berkaitan dengan harta/kekayaan." },
+                ],
+                explanation: "Nilai moral berkaitan dengan nasihat tentang baik dan buruknya perilaku manusia (etika)."
+            },
+            {
+                q: "Perbedaan utama karakterisasi tokoh pada hikayat dan cerpen adalah...",
+                options: [
+                    { text: "Tokoh hikayat realistis, tokoh cerpen mustahil.", correct: false, rationale: "Justru kebalikannya, tokoh cerpen lebih realistis." },
+                    { text: "Tokoh hikayat raja/dewa/pahlawan, tokoh cerpen masyarakat biasa/realistis.", correct: true, rationale: "Hikayat istanasentris (raja/dewa), sedangkan cerpen modern mengangkat tokoh yang lebih variatif dan realistis dari berbagai kalangan." },
+                    { text: "Tokoh hikayat selalu jahat, tokoh cerpen selalu baik.", correct: false, rationale: "Penokohan keduanya bersifat dinamis." },
+                    { text: "Tokoh hikayat selalu banyak, tokoh cerpen selalu sedikit.", correct: false, rationale: "Tidak ada aturan baku jumlah tokoh." },
+                ],
+                explanation: "Hikayat istanasentris (raja/dewa/pahlawan), sedangkan cerpen modern mengangkat tokoh yang lebih realistis dari berbagai kalangan."
+            },
+            {
+                q: "Jika cerpen nama pengarangnya jelas, maka hikayat pengarangnya...",
+                options: [
+                    { text: "Pasti seorang raja.", correct: false, rationale: "Tidak selalu raja." },
+                    { text: "Jelas dan tercatat dalam sejarah.", correct: false, rationale: "Ini ciri karya modern." },
+                    { text: "Anonim atau tidak diketahui.", correct: true, rationale: "Hikayat adalah sastra lisan lama yang bersifat komunal sehingga penulisnya tidak diketahui (anonim)." },
+                    { text: "Pasti seorang sastrawan terkenal.", correct: false, rationale: "Ini ciri karya modern." },
+                ],
+                explanation: "Hikayat adalah sastra lisan lama yang bersifat komunal sehingga penulisnya tidak diketahui (anonim)."
+            },
+            {
+                q: "Majas yang menyebut seseorang berdasarkan ciri fisik atau sifat yang menonjol (seperti 'Si Miskin' atau 'Yang Mulia') disebut...",
+                options: [
+                    { text: "Personifikasi", correct: false, rationale: "Personifikasi adalah majas benda mati seolah hidup." },
+                    { text: "Simile", correct: false, rationale: "Simile adalah perbandingan langsung." },
+                    { text: "Metafora", correct: false, rationale: "Metafora adalah perbandingan tidak langsung." },
+                    { text: "Antonomasia", correct: true, rationale: "Antonomasia adalah majas yang menggunakan julukan/ciri khas untuk menggantikan nama diri." },
+                ],
+                explanation: "Antonomasia adalah majas yang menggunakan julukan untuk menggantikan nama diri, contoh: *Si Miskin, Si Kancil, Yang Mulia*."
+            },
+            {
+                q: "Pernyataan: 'Kecantikannya bersinar **bak** bulan purnama.' Kalimat tersebut menggunakan majas...",
+                options: [
+                    { text: "Metafora", correct: false, rationale: "Metafora tidak menggunakan kata penghubung perbandingan." },
+                    { text: "Simile", correct: true, rationale: "Simile adalah perbandingan langsung yang menggunakan kata penghubung: *seperti, bagai, laksana, bak*." },
+                    { text: "Personifikasi", correct: false, rationale: "Personifikasi melekkatkan sifat manusia pada benda mati." },
+                    { text: "Hiperbola", correct: false, rationale: "Ini adalah perbandingan, bukan pelebih-lebihan." },
+                ],
+                explanation: "Simile adalah perbandingan langsung yang menggunakan kata penghubung: *seperti, bagai, laksana, bak*."
+            },
+            {
+                q: "Pernyataan: 'Angin menyambar wajahku dan dedaunan menari-nari kegirangan.' Kalimat tersebut mengandung majas...",
+                options: [
+                    { text: "Simile", correct: false, rationale: "Tidak ada kata penghubung perbandingan." },
+                    { text: "Personifikasi", correct: true, rationale: "Personifikasi melekkatkan sifat manusia (menyambar, menari-nari, kegirangan) pada benda mati/alam." },
+                    { text: "Metafora", correct: false, rationale: "Metafora adalah perbandingan implisit." },
+                    { text: "Antonomasia", correct: false, rationale: "Antonomasia adalah penggantian nama dengan julukan." },
+                ],
+                explanation: "Personifikasi melekkatkan sifat manusia (menyambar, menari-nari, kegirangan) pada benda mati/alam."
+            },
+            {
+                q: "Kutipan: 'Hatta beberapa lamanya, maka istri Si Miskin itu pun hamillah tiga bulan lamanya. Maka istrinya menangis hendak makan buah mempelam yang ada di dalam taman raja itu.' Isi kutipan di atas menceritakan tentang...",
+                options: [
+                    { text: "Si Miskin yang kaya raya.", correct: false, rationale: "Teks jelas menyebutkan 'Si Miskin'." },
+                    { text: "Raja yang kejam.", correct: false, rationale: "Raja belum menunjukkan kekejaman, hanya kepemilikan taman." },
+                    { text: "Istri Si Miskin yang mengidam buah mempelam raja.", correct: true, rationale: "Teks secara eksplisit menyebutkan istri Si Miskin hamil dan ingin (mengidam) buah mempelam dari taman raja." },
+                    { text: "Si Miskin yang mencuri buah.", correct: false, rationale: "Belum sampai tahap mencuri, baru keinginan." },
+                ],
+                explanation: "Teks secara eksplisit menyebutkan istri Si Miskin hamil dan ingin (mengidam) buah mempelam dari taman raja."
+            },
+            {
+                q: "Hal yang harus dipertahankan ketika mengubah hikayat menjadi cerpen (modernisasi) adalah...",
+                options: [
+                    { text: "Bahasa arkaisnya dan latar kerajaannya.", correct: false, rationale: "Ini harus diubah agar relevan dengan zaman modern." },
+                    { text: "Panjang ceritanya yang cenderung bertele-tele.", correct: false, rationale: "Cerpen lebih ringkas daripada hikayat." },
+                    { text: "Nilai-nilai moral/amanatnya.", correct: true, rationale: "Inti pesan atau nilai-nilai moral cerita harus tetap dipertahankan meskipun bahasa dan latar diubah." },
+                    { text: "Kata penghubung klise seperti 'maka' dan 'syahdan'.", correct: false, rationale: "Ini harus dihilangkan karena tidak sesuai dengan bahasa modern." },
+                ],
+                explanation: "Inti pesan atau nilai-nilai moral cerita harus tetap dipertahankan meskipun bahasa dan latar diubah (modernisasi)."
+            },
+            {
+                q: "Di bawah ini yang *bukan* merupakan konjungsi urutan waktu (kronologis) adalah...",
+                options: [
+                    { text: "Kemudian", correct: false, rationale: "Ini adalah konjungsi urutan waktu." },
+                    { text: "Setelah itu", correct: false, rationale: "Ini adalah konjungsi urutan waktu." },
+                    { text: "Namun", correct: true, rationale: "Namun adalah konjungsi pertentangan atau perlawanan." },
+                    { text: "Selanjutnya", correct: false, rationale: "Ini adalah konjungsi urutan waktu." },
+                ],
+                explanation: "*Namun* adalah konjungsi pertentangan. Konjungsi urutan waktu digunakan untuk menghubungkan peristiwa secara kronologis."
+            },
+            {
+                q: "Nilai-nilai (agama, budaya, sosial) dalam hikayat termasuk ke dalam unsur...",
+                options: [
+                    { text: "Intrinsik", correct: false, rationale: "Intrinsik adalah unsur dari dalam cerita (tema, alur, tokoh)." },
+                    { text: "Ekstrinsik", correct: true, rationale: "Unsur ekstrinsik adalah unsur pembangun dari luar karya sastra, termasuk nilai-nilai kehidupan dan latar belakang budaya." },
+                    { text: "Estetik", correct: false, rationale: "Estetik berkaitan dengan keindahan bahasa." },
+                    { text: "Gramatikal", correct: false, rationale: "Gramatikal berkaitan dengan tata bahasa." },
+                ],
+                explanation: "Unsur ekstrinsik adalah unsur pembangun dari luar karya sastra, termasuk nilai-nilai kehidupan dan latar belakang budaya masyarakat saat karya itu dibuat."
+            },
+            {
+                q: "Hikayat umumnya menggunakan sudut pandang...",
+                options: [
+                    { text: "Orang pertama (Aku)", correct: false, rationale: "Ini adalah sudut pandang cerpen atau novel yang fokus pada tokoh 'aku'." },
+                    { text: "Orang kedua (Kamu)", correct: false, rationale: "Ini adalah sudut pandang yang jarang digunakan." },
+                    { text: "Orang ketiga serba tahu (Dia/Nama Tokoh)", correct: true, rationale: "Hikayat menceritakan kisah orang lain (raja, pangeran) dan pencerita mengetahui segala hal tentang tokoh tersebut (Maha Tahu)." },
+                    { text: "Campuran", correct: false, rationale: "Campuran lebih umum di karya modern." },
+                ],
+                explanation: "Hikayat menggunakan sudut pandang Orang Ketiga Serba Tahu karena pencerita mengetahui segala hal tentang tokoh dan peristiwanya."
+            },
+            {
+                q: "Bahasa yang digunakan dalam hikayat adalah...",
+                options: [
+                    { text: "Bahasa Indonesia modern dengan sedikit kata arkais.", correct: false, rationale: "Ini berlaku untuk cerpen atau novel berlatar kuno." },
+                    { text: "Bahasa Melayu Klasik yang banyak mengandung kata arkais.", correct: true, rationale: "Hikayat merupakan karya sastra lama Melayu, sehingga menggunakan bahasa Melayu Klasik." },
+                    { text: "Bahasa Sansekerta.", correct: false, rationale: "Sansekerta adalah bahasa kuno India, bukan Melayu." },
+                    { text: "Bahasa Jawa Kuno.", correct: false, rationale: "Jawa Kuno digunakan dalam sastra Jawa." },
+                ],
+                explanation: "Hikayat merupakan karya sastra lama Melayu, sehingga menggunakan bahasa Melayu Klasik yang banyak mengandung kata arkais."
+            },
+            {
+                q: "Kutipan: 'Ia memohon kepada Sang Pencipta agar diberi sebuah pulau.' Kutipan ini menunjukkan nilai...",
+                options: [
+                    { text: "Sosial", correct: false, rationale: "Sosial berkaitan dengan hubungan antar manusia." },
+                    { text: "Religius", correct: true, rationale: "Memohon/berdoa kepada Sang Pencipta (Tuhan) adalah wujud hubungan manusia dengan Tuhan (Religius)." },
+                    { text: "Pendidikan", correct: false, rationale: "Pendidikan berkaitan dengan proses belajar." },
+                    { text: "Budaya", correct: false, rationale: "Budaya berkaitan dengan adat istiadat." },
+                ],
+                explanation: "Memohon/berdoa kepada Sang Pencipta (Tuhan) adalah wujud hubungan manusia dengan Tuhan (Religius)."
+            },
+            {
+                q: "Pernyataan: 'Tangisnya membelah angkasa, air matanya membanjiri bumi.' Majas yang digunakan adalah...",
+                options: [
+                    { text: "Personifikasi", correct: false, rationale: "Tidak ada benda mati yang diberi sifat manusia." },
+                    { text: "Metafora", correct: false, rationale: "Metafora adalah perbandingan implisit." },
+                    { text: "Hiperbola", correct: true, rationale: "Hiperbola adalah majas yang melebih-lebihkan kenyataan (tangis membelah angkasa, banjir air mata) untuk efek dramatis." },
+                    { text: "Simile", correct: false, rationale: "Tidak ada kata penghubung perbandingan (seperti, bak)." },
+                ],
+                explanation: "Hiperbola adalah majas yang melebih-lebihkan kenyataan (tangis membelah angkasa, banjir air mata) untuk efek dramatis."
+            },
+            {
+                q: "Pernyataan: 'Maka baginda pun mengadakan pesta besar-besaran tujuh hari tujuh malam untuk merayakan kelahiran putranya.' Hal ini mencerminkan nilai...",
+                options: [
+                    { text: "Agama", correct: false, rationale: "Fokus pada perayaan, bukan ibadah." },
+                    { text: "Budaya", correct: true, rationale: "Mengadakan pesta perayaan kelahiran (syukuran/pesta adat) merupakan bagian dari tradisi atau kebudayaan masyarakat kerajaan." },
+                    { text: "Pendidikan", correct: false, rationale: "Tidak ada proses belajar." },
+                    { text: "Moral", correct: false, rationale: "Tidak ada nasihat baik/buruk." },
+                ],
+                explanation: "Mengadakan pesta perayaan kelahiran (syukuran/pesta adat) merupakan bagian dari tradisi atau kebudayaan masyarakat kerajaan."
+            },
+            {
+                q: "Pesan moral yang ingin disampaikan pengarang kepada pembaca disebut...",
+                options: [
+                    { text: "Tema", correct: false, rationale: "Tema adalah gagasan pokok cerita." },
+                    { text: "Alur", correct: false, rationale: "Alur adalah rangkaian peristiwa." },
+                    { text: "Penokohan", correct: false, rationale: "Penokohan adalah karakterisasi tokoh." },
+                    { text: "Amanat", correct: true, rationale: "Amanat adalah pesan atau nasihat yang terkandung dalam cerita." },
+                ],
+                explanation: "Amanat adalah pesan atau nasihat yang terkandung dalam cerita."
+            },
+            // Tambahkan 25 soal lagi untuk mencapai total 50.
+            // ... (Melanjutkan 25 soal lagi)
+            // LHO (Tambahan 5 soal)
+            {
+                q: "Verba relasional berfungsi untuk menghubungkan subjek dengan pelengkap. Contoh verba relasional adalah...",
+                options: [
+                    { text: "Menulis", correct: false, rationale: "Menulis adalah verba material (aksi)." },
+                    { text: "Merupakan", correct: true, rationale: "Kata 'merupakan' menghubungkan subjek dengan pelengkap, ciri khas verba relasional." },
+                    { text: "Merasa", correct: false, rationale: "Merasa adalah verba mental." },
+                    { text: "Berlari", correct: false, rationale: "Berlari adalah verba material (aksi)." },
+                ],
+                explanation: "Verba relasional berfungsi sebagai penghubung antara subjek dan pelengkap, contohnya *adalah, merupakan, yaitu*."
+            },
+            {
+                q: "Penulisan judul LHO yang tepat sesuai EYD adalah...",
+                options: [
+                    { text: "Laporan Hasil Observasi: Gajah Di Taman Nasional Way Kambas", correct: false, rationale: "Kata depan (Di) dan konjungsi (Di) harus ditulis huruf kecil kecuali di awal." },
+                    { text: "Laporan Hasil Observasi Gajah di Taman Nasional Way Kambas", correct: true, rationale: "Semua kata utama diawali huruf kapital, dan kata depan/konjungsi (di) ditulis huruf kecil." },
+                    { text: "Laporan Hasil Observasi Gajah Di Taman Nasional Way Kambas", correct: false, rationale: "Kata depan 'di' harus ditulis huruf kecil." },
+                    { text: "LAPORAN HASIL OBSERVASI GAJAH DI TAMAN NASIONAL WAY KAMBAS", correct: false, rationale: "Huruf kapital semua hanya untuk kasus tertentu, bukan standar judul." },
+                ],
+                explanation: "Sesuai EYD, setiap kata penting dalam judul dimulai dengan huruf kapital, tetapi kata depan (di, ke, dari) dan konjungsi (dan, yang) ditulis huruf kecil."
+            },
+            {
+                q: "Kalimat yang mengandung konjungsi intrakalimat (menghubungkan klausa dalam satu kalimat) adalah...",
+                options: [
+                    { text: "Kucing dan anjing adalah hewan peliharaan.", correct: false, rationale: "Kata 'dan' di sini hanya menghubungkan kata benda." },
+                    { text: "Dia bekerja keras, oleh karena itu dia sukses.", correct: true, rationale: "Konjungsi 'oleh karena itu' menghubungkan dua klausa menjadi kalimat kompleks setara." },
+                    { text: "Mereka pergi ke pasar.", correct: false, rationale: "Ini adalah kalimat simpleks tanpa konjungsi antar klausa." },
+                    { text: "Saya membaca buku, lalu saya tidur.", correct: false, rationale: "Ini adalah konjungsi antarkalimat yang seharusnya dipisahkan titik atau koma." },
+                ],
+                explanation: "Konjungsi intrakalimat menghubungkan dua klausa dalam satu kalimat, membentuk kalimat kompleks atau majemuk. 'Oleh karena itu' dapat berfungsi sebagai konjungsi antarkalimat atau intrakalimat setara."
+            },
+            {
+                q: "Kata benda (nomina) yang dibentuk melalui proses afiksasi sufiks *–an* adalah...",
+                options: [
+                    { text: "Pembaca", correct: false, rationale: "Dibentuk dengan konfiks *pe-an*." },
+                    { text: "Kepulauan", correct: true, rationale: "Dibentuk dari kata dasar *pulau* dan sufiks *-an*." },
+                    { text: "Berlari", correct: false, rationale: "Ini adalah verba, dibentuk dengan prefiks *ber-*." },
+                    { text: "Cantik", correct: false, rationale: "Ini adalah kata dasar adjektiva (kata sifat)." },
+                ],
+                explanation: "Afiksasi sufiks *-an* pada kata dasar *pulau* membentuk nomina 'kepulauan'."
+            },
+            {
+                q: "Kata 'mengamati' termasuk verba material karena...",
+                options: [
+                    { text: "Menggambarkan kondisi batin.", correct: false, rationale: "Ini ciri verba mental." },
+                    { text: "Dapat dijadikan kalimat pasif.", correct: false, rationale: "Semua verba transitif bisa dipasifkan." },
+                    { text: "Menunjukkan suatu tindakan fisik yang dapat dilihat.", correct: true, rationale: "'Mengamati' melibatkan mata sebagai tindakan fisik yang terlihat." },
+                    { text: "Menghubungkan subjek dan pelengkap.", correct: false, rationale: "Ini ciri verba relasional." },
+                ],
+                explanation: "Verba material menunjukkan suatu tindakan fisik yang dapat dilihat, dan *mengamati* adalah salah satu bentuk tindakan fisik."
+            },
+            // Anekdot (Tambahan 5 soal)
+            {
+                q: "Bagian Koda dalam struktur anekdot berisi...",
+                options: [
+                    { text: "Pengenalan situasi awal.", correct: false, rationale: "Ini adalah orientasi." },
+                    { text: "Puncak masalah yang lucu.", correct: false, rationale: "Ini adalah krisis/komplikasi." },
+                    { text: "Penutup cerita atau simpulan.", correct: true, rationale: "Koda adalah bagian akhir yang berupa penutup, pesan, atau simpulan dari anekdot." },
+                    { text: "Tanggapan terhadap masalah yang terjadi.", correct: false, rationale: "Ini adalah reaksi/evaluasi." },
+                ],
+                explanation: "Koda adalah bagian akhir yang berupa penutup, pesan, atau simpulan dari anekdot."
+            },
+            {
+                q: "Fungsi kalimat bermakna lampau dalam anekdot adalah...",
+                options: [
+                    { text: "Menciptakan kelucuan.", correct: false, rationale: "Kelucuan didapat dari alur cerita, bukan waktu." },
+                    { text: "Menyampaikan kritik secara langsung.", correct: false, rationale: "Kalimat lampau tidak berfungsi untuk kritik." },
+                    { text: "Menyatakan bahwa peristiwa anekdot telah terjadi di masa lalu.", correct: true, rationale: "Kalimat lampau menunjukkan waktu terjadinya peristiwa anekdot, misalnya menggunakan kata *dahulu, pada suatu waktu*." },
+                    { text: "Menyebutkan tokoh utama.", correct: false, rationale: "Ini fungsi penokohan." },
+                ],
+                explanation: "Kalimat bermakna lampau, seperti *dahulu* atau *pada suatu waktu*, berfungsi untuk menyatakan bahwa peristiwa anekdot telah terjadi di masa lalu."
+            },
+            {
+                q: "Perhatikan kaidah kebahasaan berikut: 1) Verba material, 2) Konjungsi kausalitas, 3) Kalimat retoris, 4) Kalimat imperatif. Kaidah yang lazim digunakan dalam anekdot adalah...",
+                options: [
+                    { text: "1, 2, dan 4.", correct: false, rationale: "Anekdot jarang menggunakan konjungsi kausalitas secara dominan." },
+                    { text: "2 dan 3.", correct: false, rationale: "Anekdot juga menggunakan verba material dan retoris." },
+                    { text: "1, 3, dan 4.", correct: true, rationale: "Anekdot menggunakan verba aksi (1), kalimat tanya sindiran (3), dan terkadang kalimat perintah (4) untuk penyelesaian/reaksi." },
+                    { text: "Semua benar.", correct: false, rationale: "Konjungsi kausalitas (sebab-akibat) lebih dominan di teks eksposisi." },
+                ],
+                explanation: "Kaidah kebahasaan utama anekdot meliputi verba material (aksi), kalimat retoris (sindiran), dan kadang-kadang kalimat imperatif (perintah/ajakan)."
+            },
+            {
+                q: "Makna tersirat dari anekdot bertujuan untuk...",
+                options: [
+                    { text: "Menjelaskan secara eksplisit.", correct: false, rationale: "Makna tersirat berarti tidak langsung (implisit)." },
+                    { text: "Menyampaikan pesan tanpa melukai perasaan secara terbuka.", correct: true, rationale: "Tujuan utama kritik tersirat adalah menyampaikan pesan atau sindiran secara halus/implisit." },
+                    { text: "Memberi instruksi kepada pembaca.", correct: false, rationale: "Ini adalah tujuan teks prosedur." },
+                    { text: "Menciptakan alur yang rumit.", correct: false, rationale: "Alur anekdot umumnya sederhana." },
+                ],
+                explanation: "Makna tersirat (implisit) bertujuan menyampaikan pesan, kritik, atau sindiran secara halus, tidak langsung, dan tidak terbuka."
+            },
+            {
+                q: "Yang termasuk verba mental (kata kerja yang melibatkan perasaan atau pikiran) adalah...",
+                options: [
+                    { text: "Menendang", correct: false, rationale: "Menendang adalah verba material." },
+                    { text: "Berbicara", correct: false, rationale: "Berbicara adalah verba material/ucapan." },
+                    { text: "Menyetujui", correct: true, rationale: "Menyetujui adalah reaksi batin atau keputusan pikiran (verba mental)." },
+                    { text: "Membawa", correct: false, rationale: "Membawa adalah verba material." },
+                ],
+                explanation: "Verba mental menunjukkan reaksi batin, seperti 'memikirkan', 'merasakan', 'menyetujui', atau 'menginginkan'."
+            },
+            // Hikayat (Tambahan 15 soal)
+            {
+                q: "Salah satu unsur intrinsik hikayat adalah penokohan. Yang dimaksud dengan penokohan adalah...",
+                options: [
+                    { text: "Jalan cerita dari awal hingga akhir.", correct: false, rationale: "Ini adalah alur." },
+                    { text: "Gagasan pokok atau ide cerita.", correct: false, rationale: "Ini adalah tema." },
+                    { text: "Teknik pengarang dalam menampilkan dan mengembangkan watak tokoh.", correct: true, rationale: "Penokohan adalah teknik yang digunakan pengarang untuk menggambarkan karakter tokoh." },
+                    { text: "Tempat, waktu, dan suasana dalam cerita.", correct: false, rationale: "Ini adalah latar." },
+                ],
+                explanation: "Penokohan adalah teknik pengarang dalam menampilkan dan mengembangkan watak tokoh."
+            },
+            {
+                q: "Kata arkais *sebermula* memiliki makna modern yang sama dengan...",
+                options: [
+                    { text: "Akhirnya", correct: false, rationale: "Akhirnya adalah konjungsi urutan akhir." },
+                    { text: "Maka", correct: false, rationale: "Maka biasanya merujuk pada sebab-akibat atau urutan." },
+                    { text: "Permulaan", correct: true, rationale: "Sebermula berarti 'pada mulanya' atau 'permulaan cerita'." },
+                    { text: "Jikalau", correct: false, rationale: "Jikalau berarti 'jika' atau 'kalau'." },
+                ],
+                explanation: "*Sebermula* berarti 'pada permulaan cerita' atau 'mula-mula'."
+            },
+            {
+                q: "Contoh majas metafora (perbandingan implisit) yang tepat adalah...",
+                options: [
+                    { text: "Raja itu laksana singa di medan perang.", correct: false, rationale: "Ini simile (menggunakan laksana)." },
+                    { text: "Dewi malam telah menampakkan diri.", correct: true, rationale: "Dewi malam adalah metafora untuk bulan." },
+                    { text: "Pekerjaannya berjalan sangat lambat seperti siput.", correct: false, rationale: "Ini simile (menggunakan seperti)." },
+                    { text: "Anak itu memiliki semangat baja.", correct: false, rationale: "Ini adalah metonimia atau perbandingan sifat." },
+                ],
+                explanation: "Metafora adalah perbandingan tidak langsung, di mana 'dewi malam' secara implisit merujuk pada 'bulan'."
+            },
+            {
+                q: "Nilai dalam hikayat yang berkaitan dengan adat istiadat, kepercayaan, atau kebiasaan turun-temurun suatu masyarakat disebut nilai...",
+                options: [
+                    { text: "Moral", correct: false, rationale: "Moral berkaitan dengan etika baik-buruk." },
+                    { text: "Pendidikan", correct: false, rationale: "Pendidikan berkaitan dengan proses belajar." },
+                    { text: "Budaya", correct: true, rationale: "Nilai budaya berkaitan dengan adat istiadat, tradisi, dan kebiasaan masyarakat." },
+                    { text: "Ekonomi", correct: false, rationale: "Ekonomi berkaitan dengan harta benda." },
+                ],
+                explanation: "Nilai budaya berkaitan dengan adat istiadat, kepercayaan, atau kebiasaan turun-temurun suatu masyarakat."
+            },
+            {
+                q: "Mengapa hikayat cenderung menggunakan bahasa Melayu Klasik?",
+                options: [
+                    { text: "Karena penulisnya ingin menyembunyikan identitas.", correct: false, rationale: "Anonimitas adalah penyebab penggunaan bahasa lama." },
+                    { text: "Karena hikayat berasal dari zaman Melayu kuno dan diturunkan secara lisan.", correct: true, rationale: "Sebagai karya sastra lama Melayu, hikayat menggunakan bahasa Melayu Klasik yang umum pada masanya." },
+                    { text: "Karena hanya bahasa Melayu Klasik yang memiliki majas.", correct: false, rationale: "Semua bahasa memiliki majas." },
+                    { text: "Karena hikayat selalu bertema peperangan.", correct: false, rationale: "Tema hikayat beragam." },
+                ],
+                explanation: "Sebagai karya sastra lama Melayu, hikayat menggunakan bahasa Melayu Klasik yang umum pada masanya dan diwariskan secara lisan."
+            },
+            {
+                q: "Tujuan utama hikayat dibacakan pada masa lalu adalah untuk...",
+                options: [
+                    { text: "Menyusun undang-undang kerajaan.", correct: false, rationale: "Ini adalah fungsi hukum." },
+                    { text: "Menentukan silsilah keluarga.", correct: false, rationale: "Ini adalah fungsi historis/genealogi." },
+                    { text: "Pelipur lara dan membangkitkan semangat.", correct: true, rationale: "Fungsi utama adalah hiburan (pelipur lara) dan pendorong semangat juang." },
+                    { text: "Menjelaskan teknik bercocok tanam.", correct: false, rationale: "Ini adalah fungsi teknis." },
+                ],
+                explanation: "Fungsi utama hikayat adalah hiburan (pelipur lara) dan pendorong semangat juang."
+            },
+            {
+                q: "Peristiwa aneh yang tidak masuk akal, seperti batu yang bisa berbicara, dalam hikayat disebut...",
+                options: [
+                    { text: "Kemustahilan", correct: true, rationale: "Peristiwa yang tidak logis dan tidak bisa dinalar di dunia nyata disebut kemustahilan." },
+                    { text: "Kesaktian", correct: false, rationale: "Kesaktian berkaitan dengan kemampuan tokoh." },
+                    { text: "Anonim", correct: false, rationale: "Anonim berkaitan dengan pengarang." },
+                    { text: "Istanasentris", correct: false, rationale: "Istanasentris berkaitan dengan latar kerajaan." },
+                ],
+                explanation: "Peristiwa yang tidak logis dan tidak bisa dinalar di dunia nyata disebut kemustahilan."
+            },
+            {
+                q: "Dalam hikayat, tokoh jahat sering disebut...",
+                options: [
+                    { text: "Protagonis", correct: false, rationale: "Protagonis adalah tokoh utama yang baik." },
+                    { text: "Tritagonis", correct: false, rationale: "Tritagonis adalah tokoh ketiga/penengah." },
+                    { text: "Antagonis", correct: true, rationale: "Antagonis adalah tokoh penentang atau tokoh jahat." },
+                    { text: "Figuran", correct: false, rationale: "Figuran adalah tokoh latar belakang." },
+                ],
+                explanation: "Tokoh penentang atau tokoh jahat dalam cerita disebut antagonis."
+            },
+            {
+                q: "Salah satu penyebab utama hikayat bersifat anonim adalah...",
+                options: [
+                    { text: "Sifatnya yang istanasentris.", correct: false, rationale: "Istanasentris hanya latar." },
+                    { text: "Menggunakan majas yang berlebihan.", correct: false, rationale: "Majas hanya gaya bahasa." },
+                    { text: "Ditulis oleh banyak penulis.", correct: false, rationale: "Bukan ditulis banyak penulis, tetapi diwariskan secara kolektif." },
+                    { text: "Diturunkan secara lisan (tradisi lisan).", correct: true, rationale: "Tradisi lisan membuat nama pengarang hilang dan menjadi milik kolektif (anonim)." },
+                ],
+                explanation: "Tradisi lisan membuat nama pengarang hilang dan menjadi milik kolektif (anonim)."
+            },
+            {
+                q: "Majas yang menggantikan nama seseorang dengan julukan kebesaran yang dimilikinya, misalnya 'Baginda Raja' untuk raja, disebut...",
+                options: [
+                    { text: "Personifikasi", correct: false, rationale: "Personifikasi melekkatkan sifat manusia pada benda mati." },
+                    { text: "Hiperbola", correct: false, rationale: "Hiperbola adalah pelebih-lebihan." },
+                    { text: "Antonomasia", correct: true, rationale: "Antonomasia adalah majas yang menggunakan julukan/ciri khas untuk menggantikan nama diri, seperti 'Baginda Raja'." },
+                    { text: "Eufemisme", correct: false, rationale: "Eufemisme adalah penghalusan kata." },
+                ],
+                explanation: "Antonomasia adalah majas yang menggunakan julukan/ciri khas untuk menggantikan nama diri."
+            },
+            {
+                q: "Latar dalam hikayat umumnya berpusat pada...",
+                options: [
+                    { text: "Lingkungan sekolah dan kampus.", correct: false, rationale: "Ini adalah latar modern." },
+                    { text: "Kehidupan masyarakat kota besar.", correct: false, rationale: "Ini adalah latar modern." },
+                    { text: "Istana, hutan, dan negeri antah-berantah.", correct: true, rationale: "Hikayat bersifat istanasentris dan sering melibatkan latar magis seperti hutan atau negeri yang tidak jelas letaknya." },
+                    { text: "Kantor dan pusat perbelanjaan.", correct: false, rationale: "Ini adalah latar modern." },
+                ],
+                explanation: "Hikayat bersifat istanasentris dan sering melibatkan latar magis seperti hutan atau negeri yang tidak jelas letaknya."
+            },
+            {
+                q: "Konflik dalam hikayat cenderung bersifat...",
+                options: [
+                    { text: "Psikologis yang mendalam.", correct: false, rationale: "Konflik psikologis lebih khas cerpen modern." },
+                    { text: "Manusia melawan alam.", correct: false, rationale: "Ini adalah jenis konflik luar." },
+                    { text: "Manusia melawan manusia atau manusia melawan kekuatan gaib (sihir/dewa).", correct: true, rationale: "Konflik dalam hikayat sering melibatkan perebutan kekuasaan, peperangan, atau pertarungan dengan kekuatan supranatural." },
+                    { text: "Komedi absurd.", correct: false, rationale: "Ini adalah jenis humor." },
+                ],
+                explanation: "Konflik dalam hikayat sering melibatkan perebutan kekuasaan, peperangan, atau pertarungan dengan kekuatan supranatural/magis."
+            },
+            {
+                q: "Kata *titah* dalam konteks hikayat berarti...",
+                options: [
+                    { text: "Pemberian", correct: false, rationale: "Pemberian adalah hadiah." },
+                    { text: "Perintah/Sabda dari raja", correct: true, rationale: "*Titah* adalah kata arkais yang berarti perintah atau sabda dari raja atau bangsawan." },
+                    { text: "Tanda tangan", correct: false, rationale: "Tanda tangan adalah paraf." },
+                    { text: "Hadiah", correct: false, rationale: "Hadiah adalah anugerah." },
+                ],
+                explanation: "*Titah* adalah kata arkais yang berarti perintah atau sabda dari raja atau bangsawan."
+            },
+            {
+                q: "Nilai yang berkaitan dengan tata krama, sopan santun, atau cara berbicara dalam masyarakat istana disebut nilai...",
+                options: [
+                    { text: "Estetika", correct: false, rationale: "Estetika berkaitan dengan keindahan." },
+                    { text: "Moral", correct: false, rationale: "Moral berkaitan dengan etika baik-buruk." },
+                    { text: "Sosial", correct: true, rationale: "Nilai sosial berkaitan dengan interaksi antar manusia dan norma-norma yang berlaku, termasuk tata krama." },
+                    { text: "Religius", correct: false, rationale: "Religius berkaitan dengan hubungan manusia-Tuhan." },
+                ],
+                explanation: "Nilai sosial berkaitan dengan interaksi antar manusia dan norma-norma yang berlaku, termasuk tata krama dan sopan santun."
+            },
+            {
+                q: "Yang **bukan** merupakan fungsi dari majas dalam hikayat adalah...",
+                options: [
+                    { text: "Memperindah bahasa.", correct: false, rationale: "Ini adalah fungsi utama majas." },
+                    { text: "Menciptakan kesan magis dan dramatis.", correct: false, rationale: "Majas seperti hiperbola dan personifikasi membantu menciptakan kesan ini." },
+                    { text: "Memperjelas alur cerita secara objektif.", correct: true, rationale: "Majas lebih fokus pada keindahan dan kesan emosional, bukan kejelasan objektif." },
+                    { text: "Menghidupkan suasana cerita.", correct: false, rationale: "Majas personifikasi membantu menghidupkan suasana." },
+                ],
+                explanation: "Majas lebih fokus pada keindahan dan kesan emosional, bukan kejelasan objektif. Kejelasan objektif adalah ciri teks nonfiksi seperti LHO."
+            },
+            {
+                q: "Kutipan teks hikayat: 'Maka baginda pun bimbanglah, tidak tahu siapa yang patut dirayakan dalam negeri karena anaknya kedua orang itu sama-sama gagah.' Hal ini menunjukkan nilai budaya bahwa raja...",
+                options: [
+                    { text: "Harus selalu mencari muslihat.", correct: false, rationale: "Muslihat adalah langkah berikutnya." },
+                    { text: "Ditunjuk berdasarkan keturunan dan putra yang paling gagah yang akan menjadi raja.", correct: true, rationale: "Nilai budaya kerajaan adalah suksesi berdasarkan keturunan dan keunggulan fisik/kecakapan (gagah)." },
+                    { text: "Selalu mencari harta karun.", correct: false, rationale: "Tidak ada indikasi harta karun." },
+                    { text: "Tidak boleh memiliki putra lebih dari satu.", correct: false, rationale: "Boleh, tetapi harus memilih yang terbaik." },
+                ],
+                explanation: "Hal ini menunjukkan nilai budaya kerajaan yang mengharuskan raja mencari tahu putra mana yang paling gagah dan layak meneruskan takhta."
+            },
+            // Kembali ke LHO/Anekdot (Tambahan 10 soal)
+            {
+                q: "Ciri kebahasaan teks laporan hasil observasi adalah menggunakan kata penghubung yang menyatakan...",
+                options: [
+                    { text: "Perintah", correct: false, rationale: "Perintah (imperatif) adalah ciri teks prosedur/anekdot." },
+                    { text: "Sifat (adjektiva) dan klasifikasi (verba relasional)", correct: true, rationale: "LHO banyak menggunakan kata sifat (deskripsi) dan verba relasional (definisi/klasifikasi)." },
+                    { text: "Sindiran (retoris)", correct: false, rationale: "Sindiran (retoris) adalah ciri teks anekdot." },
+                    { text: "Perasaan (mental)", correct: false, rationale: "Verba mental lebih umum di teks narasi." },
+                ],
+                explanation: "LHO banyak menggunakan kata sifat (adjektiva) untuk menggambarkan objek dan verba relasional untuk mengklasifikasikan atau mendefinisikan."
+            },
+            {
+                q: "Kalimat yang menggunakan kata 'di' sebagai kata depan yang menunjukkan tempat adalah...",
+                options: [
+                    { text: "Disimpan olehnya.", correct: false, rationale: "Disimpan adalah imbuhan." },
+                    { text: "Dibaca dengan teliti.", correct: false, rationale: "Dibaca adalah imbuhan." },
+                    { text: "Ditulis di buku.", correct: true, rationale: "'Di buku' menunjukkan keterangan tempat, sehingga 'di' adalah kata depan yang harus dipisah." },
+                    { text: "Dibuat dari kayu.", correct: false, rationale: "Dibuat adalah imbuhan." },
+                ],
+                explanation: "Kata depan 'di' (yang berfungsi sebagai preposisi penunjuk tempat) harus ditulis terpisah dari kata yang mengikutinya."
+            },
+            {
+                q: "Contoh kalimat kompleks setara (koordinatif) adalah...",
+                options: [
+                    { text: "Karena hujan deras, Ani tidak datang.", correct: false, rationale: "Ini kompleks bertingkat (hubungan sebab-akibat)." },
+                    { text: "Dia ingin menjadi dokter, tetapi ibunya menyarankan menjadi guru.", correct: true, rationale: "Kedua klausa memiliki kedudukan setara dan dihubungkan oleh konjungsi pertentangan (tetapi)." },
+                    { text: "Setelah makan, ia menonton film.", correct: false, rationale: "Ini kompleks bertingkat (hubungan waktu)." },
+                    { text: "Kopi adalah minuman.", correct: false, rationale: "Ini kalimat simpleks." },
+                ],
+                explanation: "Kalimat kompleks setara (koordinatif) terdiri dari dua klausa yang setara dan dihubungkan oleh konjungsi seperti *dan, atau, tetapi*."
+            },
+            {
+                q: "Manakah yang merupakan tujuan penulisan daftar pustaka?",
+                options: [
+                    { text: "Menghindari plagiarisme dan menunjukkan etika akademik.", correct: true, rationale: "Daftar pustaka mengakui sumber dan menunjukkan kejujuran akademik." },
+                    { text: "Menggunakan kutipan langsung sebanyak mungkin.", correct: false, rationale: "Justru mendorong lebih banyak kutipan tidak langsung atau parafrase." },
+                    { text: "Menjelaskan isi ringkasan tulisan.", correct: false, rationale: "Ini adalah fungsi abstrak/simpulan." },
+                    { text: "Menyusun kerangka tulisan.", correct: false, rationale: "Ini adalah fungsi kerangka karangan." },
+                ],
+                explanation: "Daftar pustaka berfungsi untuk mengakui sumber informasi dan menunjukkan etika akademik dengan menghindari plagiarisme."
+            },
+            {
+                q: "Bagian 'Deskripsi Bagian' dalam LHO berisi...",
+                options: [
+                    { text: "Penjelasan umum mengenai objek.", correct: false, rationale: "Ini adalah pernyataan umum." },
+                    { text: "Rincian detail, ciri fisik, atau klasifikasi sub-bagian dari objek yang diamati.", correct: true, rationale: "Deskripsi bagian memuat rincian aspek yang dilaporkan dan dijelaskan secara detail." },
+                    { text: "Kesimpulan dan rekomendasi.", correct: false, rationale: "Ini adalah simpulan/deskripsi manfaat." },
+                    { text: "Latar belakang observasi.", correct: false, rationale: "Ini adalah bagian pendahuluan." },
+                ],
+                explanation: "Deskripsi bagian memuat rincian aspek yang dilaporkan dan dijelaskan secara detail berdasarkan hasil pengamatan."
+            },
+            {
+                q: "Dalam anekdot, bagian 'Reaksi' merujuk pada...",
+                options: [
+                    { text: "Penyebab terjadinya masalah.", correct: false, rationale: "Penyebab masalah ada di orientasi/komplikasi." },
+                    { text: "Langkah penyelesaian masalah yang dilakukan tokoh.", correct: true, rationale: "Reaksi adalah tanggapan tokoh (berupa tindakan) terhadap masalah yang terjadi." },
+                    { text: "Penutup cerita.", correct: false, rationale: "Penutup adalah koda." },
+                    { text: "Persetujuan dari pembaca.", correct: false, rationale: "Persetujuan adalah fungsi persuasif." },
+                ],
+                explanation: "Reaksi adalah tanggapan tokoh (berupa tindakan) terhadap masalah yang terjadi dalam anekdot."
+            },
+            {
+                q: "Sindiran halus yang terkandung dalam anekdot seringkali bersifat 'terselubung' atau 'tersirat' karena...",
+                options: [
+                    { text: "Agar kritik tidak terlalu menyinggung dan lebih diterima.", correct: true, rationale: "Tujuan sindiran halus adalah menyampaikan kritik dengan cara yang santun dan tidak terlalu menyinggung (lebih mudah diterima)." },
+                    { text: "Pengarang tidak berani mengungkapkan pendapatnya.", correct: false, rationale: "Ini menunjukkan ketidakberanian, bukan teknik sastra." },
+                    { text: "Cerita harus panjang.", correct: false, rationale: "Anekdot adalah cerita singkat." },
+                    { text: "Memang harus begitu agar lucu.", correct: false, rationale: "Kelucuan adalah media, sindiran adalah tujuan." },
+                ],
+                explanation: "Sindiran tersirat digunakan agar kritik tidak terlalu menyinggung, namun pesannya tetap tersampaikan secara efektif."
+            },
+            {
+                q: "Kalimat yang menggunakan verba material dan retoris adalah...",
+                options: [
+                    { text: "Mengapa kamu memikirkan masalah ini sendirian?", correct: false, rationale: "Ini verba mental (memikirkan) dan pertanyaan biasa." },
+                    { text: "Siapa yang berani menantang dia setelah ia memukul lawannya?", correct: true, rationale: "Menggunakan verba material (memukul) dan kalimat retoris (siapa yang berani...)." },
+                    { text: "Aku adalah seorang guru.", correct: false, rationale: "Ini verba relasional." },
+                    { text: "Dia merasa sangat sedih dan menangis.", correct: false, rationale: "Ini verba mental (merasa) dan material (menangis)." },
+                ],
+                explanation: "Kalimat retoris adalah pertanyaan yang tidak memerlukan jawaban, dan verba material adalah kata kerja aksi (memukul)."
+            },
+            {
+                q: "Unsur dalam teks laporan observasi yang tidak boleh mengandung opini adalah...",
+                options: [
+                    { text: "Pernyataan umum", correct: false, rationale: "Pernyataan umum harus berdasarkan fakta." },
+                    { text: "Deskripsi bagian", correct: false, rationale: "Deskripsi bagian harus berdasarkan fakta." },
+                    { text: "Deskripsi manfaat", correct: false, rationale: "Deskripsi manfaat juga berdasarkan fungsi objek." },
+                    { text: "Semua bagian teks harus berdasarkan fakta dan objektif.", correct: true, rationale: "Teks LHO harus bersifat informatif, komunikatif, dan objektif di semua bagiannya." },
+                ],
+                explanation: "LHO harus bersifat informatif, komunikatif, dan objektif di semua bagiannya, sehingga tidak boleh mengandung opini pribadi."
+            },
+            {
+                q: "Dalam menyusun kerangka LHO, langkah yang paling tepat untuk menentukan sub-bab yang akan dilaporkan terdapat pada bagian...",
+                options: [
+                    { text: "Pernyataan umum (klasifikasi).", correct: false, rationale: "Pernyataan umum adalah definisi/klasifikasi awal." },
+                    { text: "Deskripsi bagian.", correct: true, rationale: "Sub-bab rinci mengenai aspek yang dilaporkan ditentukan di deskripsi bagian." },
+                    { text: "Deskripsi manfaat.", correct: false, rationale: "Deskripsi manfaat adalah kegunaan, bukan sub-bab rincian." },
+                    { text: "Kesimpulan.", correct: false, rationale: "Kesimpulan adalah penutup." },
+                ],
+                explanation: "Sub-bab rincian (aspek yang dilaporkan) dari objek observasi dijelaskan dalam bagian Deskripsi Bagian."
+            },
+            // Tambahan 10 soal Hikayat/Majas/Nilai
+            {
+                q: "Perhatikan kutipan: 'Adapun nama Baginda itu Syah Alim, usianya sudah lanjut, tetapi tiada beranak.' Kata *adapun* termasuk kata arkais yang berfungsi sebagai...",
+                options: [
+                    { text: "Kata sapaan", correct: false, rationale: "Kata sapaan adalah panggilan." },
+                    { text: "Konjungsi subordinatif", correct: false, rationale: "Konjungsi subordinatif menghubungkan klausa tidak setara." },
+                    { text: "Konjungsi antarkalimat", correct: true, rationale: "*Adapun* berfungsi sebagai konjungsi antarkalimat yang digunakan untuk memulai pembicaraan." },
+                    { text: "Kata sifat", correct: false, rationale: "Kata sifat adalah adjektiva." },
+                ],
+                explanation: "*Adapun* berfungsi sebagai konjungsi antarkalimat yang digunakan untuk memulai atau melanjutkan pembicaraan dalam gaya sastra lama."
+            },
+            {
+                q: "Kemustahilan dalam *Hikayat Indera Bangsawan* yang melibatkan raksasa perempuan memberikan ilmu dan senjata kepada Indera Bangsawan menunjukkan bahwa...",
+                options: [
+                    { text: "Hikayat bersifat rasional dan logis.", correct: false, rationale: "Ini menunjukkan sifat magis dan kemustahilan." },
+                    { text: "Raksasa adalah tokoh baik.", correct: false, rationale: "Meskipun membantu, raksasa secara umum adalah makhluk mustahil." },
+                    { text: "Unsur magis dan supranatural sangat kuat dalam hikayat.", correct: true, rationale: "Keterlibatan makhluk supranatural dan pemberian ilmu/senjata magis adalah ciri kemustahilan/magis." },
+                    { text: "Hikayat harus diakhiri dengan pertempuran.", correct: false, rationale: "Tidak semua harus diakhiri pertempuran." },
+                ],
+                explanation: "Keterlibatan makhluk supranatural dan pemberian ilmu/senjata magis adalah ciri kemustahilan/magis yang sangat kuat dalam hikayat."
+            },
+            {
+                q: "Majas yang digunakan untuk membandingkan dua hal secara tidak langsung dan padat, tanpa menggunakan kata *seperti* atau *bagai*, adalah...",
+                options: [
+                    { text: "Simile", correct: false, rationale: "Simile menggunakan kata perbandingan." },
+                    { text: "Hiperbola", correct: false, rationale: "Hiperbola adalah pelebih-lebihan." },
+                    { text: "Metafora", correct: true, rationale: "Metafora adalah perbandingan implisit (tidak langsung) dan padat." },
+                    { text: "Personifikasi", correct: false, rationale: "Personifikasi melekkatkan sifat manusia pada benda mati." },
+                ],
+                explanation: "Metafora adalah perbandingan tidak langsung (implisit) tanpa menggunakan kata perbandingan."
+            },
+            {
+                q: "Kutipan: 'Jikalau baginda pun mencari muslihat; ia menceritakan kepada kedua anaknya bahwa ia bermimpi bertemu dengan seorang pemuda yang berkata kepadanya: barang siapa yang dapat mencari buluh perindu, ialah yang patut menjadi raja.' Nilai yang terkandung adalah...",
+                options: [
+                    { text: "Nilai keadilan", correct: false, rationale: "Keadilan adalah perlakuan setara." },
+                    { text: "Nilai politik (sistem suksesi)", correct: true, rationale: "Kutipan ini menunjukkan adanya sistem pemilihan pengganti raja (suksesi) berdasarkan tantangan (muslihat)." },
+                    { text: "Nilai kepahlawanan", correct: false, rationale: "Kepahlawanan adalah keberanian dalam perang." },
+                    { text: "Nilai ketulusan", correct: false, rationale: "Ketulusan adalah keikhlasan hati." },
+                ],
+                explanation: "Kutipan ini menunjukkan adanya sistem pemilihan pengganti raja (suksesi) berdasarkan tantangan (muslihat) yang merupakan nilai politik/budaya kerajaan."
+            },
+            {
+                q: "Jika tokoh dalam cerpen sering mengalami perkembangan watak yang dinamis, tokoh dalam hikayat cenderung...",
+                options: [
+                    { text: "Memiliki watak yang datar dan statis.", correct: true, rationale: "Tokoh hikayat seringkali statis (tetap) dan bersifat hitam-putih (baik mutlak atau jahat mutlak)." },
+                    { text: "Tidak memiliki watak sama sekali.", correct: false, rationale: "Setiap tokoh pasti punya watak." },
+                    { text: "Selalu berubah-ubah setiap saat.", correct: false, rationale: "Ini terlalu dinamis untuk hikayat." },
+                    { text: "Dideskripsikan menggunakan bahasa modern.", correct: false, rationale: "Ini tentang bahasa, bukan watak." },
+                ],
+                explanation: "Tokoh hikayat seringkali statis (tetap) dan bersifat hitam-putih (baik mutlak atau jahat mutlak), tidak seperti tokoh cerpen yang dinamis."
+            },
+            {
+                q: "Dalam hikayat, penggunaan majas berlebihan (hiperbola) untuk mendeskripsikan kecantikan putri atau ketampanan pangeran bertujuan untuk...",
+                options: [
+                    { text: "Menciptakan kesan realistis.", correct: false, rationale: "Justru tidak realistis." },
+                    { text: "Menghemat kata-kata.", correct: false, rationale: "Majas cenderung memperpanjang kalimat." },
+                    { text: "Menegaskan status keagungan atau kemuliaan tokoh bangsawan.", correct: true, rationale: "Hiperbola digunakan untuk menegaskan keistimewaan dan status agung para tokoh istana." },
+                    { text: "Menyampaikan sindiran sosial.", correct: false, rationale: "Sindiran adalah tujuan anekdot." },
+                ],
+                explanation: "Hiperbola digunakan untuk menegaskan keistimewaan dan status agung para tokoh istana."
+            },
+            {
+                q: "Perbedaan utama cerpen dengan hikayat dalam unsur kebahasaan adalah cerpen...",
+                options: [
+                    { text: "Menggunakan kalimat kompleks yang rumit.", correct: false, rationale: "Hikayat juga bisa menggunakan kalimat kompleks." },
+                    { text: "Menggunakan sudut pandang orang ketiga serba tahu.", correct: false, rationale: "Hikayat juga menggunakan sudut pandang ini." },
+                    { text: "Menggunakan bahasa yang modern, lugas, dan realistis.", correct: true, rationale: "Cerpen menggunakan bahasa yang sesuai dengan perkembangan zaman, lugas, dan lebih realistis dibandingkan bahasa arkais hikayat." },
+                    { text: "Selalu menggunakan majas hiperbola.", correct: false, rationale: "Majas dalam cerpen lebih variatif." },
+                ],
+                explanation: "Cerpen menggunakan bahasa yang modern, lugas, dan lebih realistis dibandingkan bahasa arkais hikayat."
+            },
+            {
+                q: "Kutipan: 'Adapun perahu Raja Indera Muda itu pun datanglah. Dari jauh dilihat olehnya tujuh buah perahu yang besar-besar itu tiada bergerak-gerak.' Latar dalam kutipan ini adalah...",
+                options: [
+                    { text: "Pesisir pantai.", correct: true, rationale: "Kata 'perahu' dan 'laut' (tersirat) mengacu pada latar di pesisir atau laut." },
+                    { text: "Istana megah.", correct: false, rationale: "Tidak ada unsur istana." },
+                    { text: "Hutan lebat.", correct: false, rationale: "Tidak ada unsur hutan." },
+                    { text: "Pasar tradisional.", correct: false, rationale: "Tidak ada unsur pasar." },
+                ],
+                explanation: "Kata 'perahu' menunjukkan bahwa latar cerita berada di area perairan, yaitu pesisir pantai atau laut."
+            },
+            {
+                q: "Kata arkais *upeti* yang harus dibayarkan rakyat kepada raja, dalam bahasa modern berarti...",
+                options: [
+                    { text: "Hadiah", correct: false, rationale: "Hadiah bersifat sukarela." },
+                    { text: "Pajak atau sembah-sembahan", correct: true, rationale: "*Upeti* adalah sembah-sembahan, hadiah, atau iuran wajib yang harus dibayarkan oleh rakyat/taklukan kepada raja." },
+                    { text: "Gaji", correct: false, rationale: "Gaji adalah imbalan kerja." },
+                    { text: "Utang", correct: false, rationale: "Utang adalah pinjaman." },
+                ],
+                explanation: "*Upeti* adalah sembah-sembahan, hadiah, atau iuran wajib yang harus dibayarkan oleh rakyat/taklukan kepada raja (sebanding dengan pajak)."
+            },
+            {
+                q: "Contoh nilai sosial yang terkandung dalam hikayat adalah...",
+                options: [
+                    { text: "Kepatuhan kepada Tuhan.", correct: false, rationale: "Ini nilai religius." },
+                    { text: "Bakti seorang anak kepada orang tua dan sopan santun dalam bergaul.", correct: true, rationale: "Bakti dan sopan santun berkaitan dengan hubungan dan interaksi antar manusia (nilai sosial)." },
+                    { text: "Keindahan istana yang berkilauan.", correct: false, rationale: "Ini nilai estetika." },
+                    { text: "Pentingnya menuntut ilmu agama.", correct: false, rationale: "Ini nilai pendidikan/religius." },
+                ],
+                explanation: "Nilai sosial berkaitan dengan interaksi antar manusia dan norma-norma yang berlaku, seperti bakti dan sopan santun."
+            },
+            
+            // Tambahan 10 soal untuk genap 50
+            // LHO/Umum (5 soal)
+            {
+                q: "Mengapa teks laporan hasil observasi harus bersifat faktual dan objektif?",
+                options: [
+                    { text: "Agar pembaca terhibur oleh ceritanya.", correct: false, rationale: "Teks LHO tidak bertujuan menghibur." },
+                    { text: "Agar dapat menjelaskan objek secara subjektif (sesuai perasaan penulis).", correct: false, rationale: "LHO harus objektif, bukan subjektif." },
+                    { text: "Agar informasi yang disampaikan akurat, tidak bias, dan dapat dipertanggungjawabkan kebenarannya.", correct: true, rationale: "Faktual dan objektif adalah kunci validitas informasi dalam LHO." },
+                    { text: "Agar dapat memengaruhi opini publik.", correct: false, rationale: "LHO harus bebas dari upaya memengaruhi." },
+                ],
+                explanation: "LHO harus faktual dan objektif agar informasi yang disampaikan akurat, tidak bias, dan dapat dipertanggungjawabkan kebenarannya sebagai hasil pengamatan."
+            },
+            {
+                q: "Proses pembentukan kata 'penjelasan' adalah...",
+                options: [
+                    { text: "Dasar *jelas* + prefiks *pe-*.", correct: false, rationale: "Hanya prefiks *pe-an*." },
+                    { text: "Dasar *jelas* + sufiks *-an*.", correct: false, rationale: "Hanya sufiks *-an*." },
+                    { text: "Dasar *jelas* + konfiks *pe-an*.", correct: true, rationale: "Kata *penjelasan* dibentuk dari kata dasar *jelas* dengan konfiks *pe-an*." },
+                    { text: "Dasar *jelas* + prefiks *pen-*.", correct: false, rationale: "Tidak ada prefiks *pen-*." },
+                ],
+                explanation: "Kata *penjelasan* dibentuk dari kata dasar *jelas* dengan konfiks *pe-an*."
+            },
+            {
+                q: "Verba yang diikuti oleh objek (transitif) dapat diubah menjadi kalimat pasif. Verba berikut yang **tidak dapat** dipasifkan adalah...",
+                options: [
+                    { text: "Memasak", correct: false, rationale: "Bisa: 'dimasak'." },
+                    { text: "Menyanyi", correct: true, rationale: "Verba tak transitif seperti *menyanyi* atau *berlari* tidak dapat diubah menjadi kalimat pasif karena tidak memiliki objek." },
+                    { text: "Membeli", correct: false, rationale: "Bisa: 'dibeli'." },
+                    { text: "Membaca", correct: false, rationale: "Bisa: 'dibaca'." },
+                ],
+                explanation: "Verba tak transitif seperti *menyanyi* atau *berlari* tidak dapat diubah menjadi kalimat pasif karena tidak memiliki objek."
+            },
+            {
+                q: "Salah satu ciri utama dari kalimat simpleks adalah...",
+                options: [
+                    { text: "Memiliki lebih dari satu predikat.", correct: false, rationale: "Ini ciri kalimat kompleks/majemuk." },
+                    { text: "Memiliki satu predikat/klausa tunggal.", correct: true, rationale: "Kalimat simpleks adalah kalimat yang hanya terdiri dari satu klausa (satu pola S-P)." },
+                    { text: "Menggunakan banyak konjungsi antarklausa.", correct: false, rationale: "Ini ciri kalimat kompleks." },
+                    { text: "Selalu menggunakan verba relasional.", correct: false, rationale: "Bisa menggunakan verba jenis lain." },
+                ],
+                explanation: "Kalimat simpleks adalah kalimat yang hanya terdiri dari satu klausa (satu pola S-P)."
+            },
+            {
+                q: "Penulisan sumber kutipan tidak langsung dari jurnal ilmiah di akhir paragraf yang paling tepat (format Tahun, Halaman) adalah...",
+                options: [
+                    { text: "(Slamet, 2022: 45)", correct: true, rationale: "Format Nama Belakang, Tahun: Halaman adalah umum untuk kutipan di akhir kalimat." },
+                    { text: "(Slamet 2022, halaman 45)", correct: false, rationale: "Terlalu panjang dan tidak baku." },
+                    { text: "Slamet (2022) mengatakan...", correct: false, rationale: "Ini format di awal/tengah kalimat." },
+                    { text: "[Slamet, 2022, 45]", correct: false, rationale: "Penggunaan tanda kurung siku tidak baku untuk format ini." },
+                ],
+                explanation: "Format Nama Belakang, Tahun: Halaman adalah format standar untuk mencantumkan sumber kutipan tidak langsung di akhir kalimat."
+            },
+            // Anekdot/Hikayat (5 soal)
+            {
+                q: "Majas yang digunakan dalam anekdot untuk memberikan penekanan bahwa suatu hal itu sangat luar biasa (berlebihan) adalah...",
+                options: [
+                    { text: "Ironi", correct: false, rationale: "Ironi adalah sindiran halus." },
+                    { text: "Litotes", correct: false, rationale: "Litotes adalah merendahkan diri." },
+                    { text: "Hiperbola", correct: true, rationale: "Hiperbola adalah majas yang melebih-lebihkan kenyataan." },
+                    { text: "Metafora", correct: false, rationale: "Metafora adalah perbandingan implisit." },
+                ],
+                explanation: "Hiperbola adalah majas yang melebih-lebihkan kenyataan dan sering digunakan dalam anekdot atau hikayat untuk memberikan penekanan."
+            },
+            {
+                q: "Mengapa cerpen dianggap lebih *relevan* dengan kehidupan sehari-hari dibandingkan hikayat?",
+                options: [
+                    { text: "Karena cerpen lebih pendek.", correct: false, rationale: "Panjang bukan penentu relevansi." },
+                    { text: "Karena cerpen mengangkat tema dan latar belakang sosial yang modern dan realistis.", correct: true, rationale: "Cerpen tidak terikat pada istanasentris dan kemustahilan, membuatnya lebih realistis." },
+                    { text: "Karena cerpen menggunakan alur berbingkai.", correct: false, rationale: "Hikayat yang menggunakan alur berbingkai." },
+                    { text: "Karena cerpen wajib menggunakan bahasa baku.", correct: false, rationale: "Bahasa cerpen lebih variatif." },
+                ],
+                explanation: "Cerpen dianggap lebih relevan karena mengangkat tema, tokoh, dan latar belakang sosial yang modern dan realistis."
+            },
+            {
+                q: "Bagian Evaluasi dalam anekdot berisi...",
+                options: [
+                    { text: "Penjelasan mengapa peristiwa itu lucu.", correct: false, rationale: "Kelucuan didapat dari keseluruhan krisis." },
+                    { text: "Reaksi tokoh terhadap masalah.", correct: false, rationale: "Ini adalah Reaksi." },
+                    { text: "Penjelasan mendetail tentang akibat dari krisis yang terjadi.", correct: true, rationale: "Evaluasi adalah bagian yang menjelaskan akibat dari krisis yang dialami tokoh, bisa berupa tanggapan, komentar, atau penilaian terhadap masalah yang disajikan." },
+                    { text: "Kesimpulan moral cerita.", correct: false, rationale: "Ini adalah Koda." },
+                ],
+                explanation: "Evaluasi adalah bagian yang menjelaskan akibat dari krisis yang dialami tokoh, bisa berupa tanggapan, komentar, atau penilaian terhadap masalah yang disajikan."
+            },
+            {
+                q: "Nilai yang berkaitan dengan hubungan antara individu dengan lingkungan sekitar atau masyarakatnya disebut nilai...",
+                options: [
+                    { text: "Moral", correct: false, rationale: "Moral berkaitan dengan etika pribadi." },
+                    { text: "Sosial", correct: true, rationale: "Nilai sosial berkaitan dengan interaksi dan norma-norma yang berlaku dalam masyarakat." },
+                    { text: "Budaya", correct: false, rationale: "Budaya berkaitan dengan tradisi dan adat." },
+                    { text: "Religius", correct: false, rationale: "Religius berkaitan dengan hubungan manusia-Tuhan." },
+                ],
+                explanation: "Nilai sosial berkaitan dengan interaksi dan norma-norma yang berlaku dalam masyarakat."
+            },
+            {
+                q: "Kutipan teks anekdot yang menunjukkan kalimat bermakna lampau adalah...",
+                options: [
+                    { text: "Sekarang, pejabat itu menjabat sebagai menteri.", correct: false, rationale: "Menunjukkan waktu sekarang." },
+                    { text: "Pada suatu hari, hiduplah seorang raja yang sangat bijaksana.", correct: true, rationale: "Frasa 'Pada suatu hari' dan 'hiduplah' menunjukkan waktu yang telah lampau." },
+                    { text: "Besok pagi, kita akan bertemu lagi.", correct: false, rationale: "Menunjukkan waktu yang akan datang." },
+                    { text: "Tolong segera berikan laporan itu!", correct: false, rationale: "Ini adalah kalimat perintah." },
+                ],
+                explanation: "Frasa seperti 'Pada suatu hari', 'Dahulu kala', atau kata kerja lampau menunjukkan waktu terjadinya peristiwa anekdot telah berlalu."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = new Array(questions.length).fill(false); // Melacak apakah soal sudah dijawab
+
+        document.getElementById('total-questions').textContent = questions.length;
+
+        // Fungsi untuk mengacak urutan pilihan jawaban
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Fungsi untuk memuat soal
+        function loadQuestion() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            if (currentQuestionIndex >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const qData = questions[currentQuestionIndex];
+            const qNumber = currentQuestionIndex + 1;
+
+            // Pastikan pilihan diacak setiap kali soal dimuat
+            const shuffledOptions = [...qData.options];
+            shuffleArray(shuffledOptions);
+
+            const questionHtml = `
+                <div class="question-card" data-index="${currentQuestionIndex}">
+                    <p class="text-xl font-semibold text-gray-800 mb-4">Soal ${qNumber}. ${qData.q}</p>
+                    <div class="options-group" id="options-${currentQuestionIndex}">
+                        ${shuffledOptions.map((option, index) => `
+                            <button class="option-button" data-correct="${option.correct}" data-index="${index}" onclick="checkAnswer(this, ${currentQuestionIndex})">
+                                ${['A', 'B', 'C', 'D'][index]}. ${option.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="explanation-${currentQuestionIndex}" class="explanation hidden">
+                        <p class="font-bold mb-2">Penjelasan:</p>
+                        <p id="rationale-text-${currentQuestionIndex}"></p>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = questionHtml;
+            document.getElementById('current-question-number').textContent = qNumber;
+            updateNextButtonState();
+        }
+
+        // Fungsi untuk memeriksa jawaban
+        function checkAnswer(selectedButton, qIndex) {
+            if (answeredQuestions[qIndex]) return; // Cegah double-click
+
+            const isCorrect = selectedButton.dataset.correct === 'true';
+            answeredQuestions[qIndex] = true;
+
+            const optionsGroup = document.getElementById(`options-${qIndex}`);
+            const buttons = optionsGroup.querySelectorAll('.option-button');
+            const explanationDiv = document.getElementById(`explanation-${qIndex}`);
+            const rationaleText = document.getElementById(`rationale-text-${qIndex}`);
+            const qData = questions[qIndex];
+
+            let correctOptionText = '';
+
+            buttons.forEach(button => {
+                button.classList.add('disabled');
+                button.disabled = true;
+
+                // Tampilkan semua rasional dan tandai yang benar
+                const optionIndex = parseInt(button.dataset.index);
+                const originalOption = qData.options.find(opt => opt.text === button.textContent.substring(3).trim());
+
+                if (originalOption && originalOption.correct) {
+                    button.classList.add('correct');
+                    correctOptionText = originalOption.text;
+                }
+
+                if (button === selectedButton) {
+                    if (isCorrect) {
+                        score++;
+                    } else {
+                        button.classList.add('incorrect');
+                    }
+                }
+            });
+            
+            // Tampilkan penjelasan
+            explanationDiv.classList.remove('hidden');
+            if (isCorrect) {
+                 explanationDiv.classList.add('correct-bg');
+                 rationaleText.innerHTML = `<span class="font-bold text-green-700">Jawaban Anda BENAR.</span> ${qData.explanation}`;
+            } else {
+                 explanationDiv.classList.add('incorrect-bg');
+                 const correctLetter = getCorrectOptionLetter(qData, buttons);
+                 rationaleText.innerHTML = `<span class="font-bold text-red-700">Jawaban Anda SALAH.</span> Jawaban yang benar adalah <span class="font-bold">${correctLetter}. ${correctOptionText}</span>. ${qData.explanation}`;
+            }
+
+            updateNextButtonState();
+        }
+        
+        // Fungsi bantu untuk mendapatkan huruf opsi yang benar
+        function getCorrectOptionLetter(qData, buttons) {
+            let correctOptionText = qData.options.find(opt => opt.correct).text;
+            let correctLetter = '';
+            buttons.forEach(button => {
+                const buttonText = button.textContent.substring(3).trim();
+                if (buttonText === correctOptionText) {
+                    correctLetter = button.textContent.substring(0, 1);
+                }
+            });
+            return correctLetter;
+        }
+
+
+        // Fungsi untuk memperbarui tombol Selanjutnya
+        function updateNextButtonState() {
+            const nextButton = document.getElementById('next-button');
+            if (currentQuestionIndex < questions.length && answeredQuestions[currentQuestionIndex]) {
+                nextButton.disabled = false;
+                nextButton.classList.remove('opacity-50');
+            } else {
+                nextButton.disabled = true;
+                nextButton.classList.add('opacity-50');
+            }
+            if (currentQuestionIndex === questions.length - 1 && answeredQuestions[currentQuestionIndex]) {
+                nextButton.textContent = "Lihat Hasil";
+            } else if (currentQuestionIndex < questions.length - 1) {
+                nextButton.textContent = "Selanjutnya";
+            }
+        }
+
+        // Fungsi untuk pindah ke soal berikutnya
+        function nextQuestion() {
+            if (answeredQuestions[currentQuestionIndex]) {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        }
+
+        // Fungsi untuk menampilkan hasil
+        function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('results-container').classList.remove('hidden');
+            document.querySelector('.fixed.bottom-0').classList.add('hidden');
+
+            const scoreDisplay = document.getElementById('score-display');
+            const feedbackMessage = document.getElementById('feedback-message');
+            scoreDisplay.textContent = `${score}/${questions.length}`;
+
+            let message = '';
+            const percentage = (score / questions.length) * 100;
+            
+            if (percentage === 100) {
+                message = "Selamat! Anda menguasai materi ini dengan sempurna! 🌟";
+            } else if (percentage >= 80) {
+                message = "Luar biasa! Tingkatkan sedikit lagi di beberapa poin. 👍";
+            } else if (percentage >= 60) {
+                message = "Cukup baik. Perlu pengulangan dan fokus pada topik yang kurang dipahami.";
+            } else {
+                message = "Jangan menyerah! Ulangi kuis ini sambil meninjau kembali materi Bab 1, 2, dan 3.";
+            }
+            feedbackMessage.textContent = message;
+        }
+
+        // Fungsi untuk mengulang kuis
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions.fill(false);
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.querySelector('.fixed.bottom-0').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Inisialisasi Kuis saat halaman dimuat
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
