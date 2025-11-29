@@ -81,7 +81,7 @@ const allQuestions = [
     { id: 75, text: "Kata arkais yang memiliki arti 'Maka' adalah...", options: ["Syahdan", "Maka", "Hatta", "Alkisah"], correctAnswer: 1, rationale: "Kata 'Maka' itu sendiri adalah kata arkais yang sering digunakan sebagai konjungsi atau penanda awal kalimat dalam hikayat.", hint: "Kata penghubung yang paling umum di hikayat." },
 
     // --- Kaidah Bahasa & Penulisan - Soal 76-109 ---
-    { id: 76, text: "Penulisan afiksasi yang benar dari kata dasar 'salah' dengan prefiks *ke-* dan sufiks *-an* adalah...", options: ["kesalahan", "kesalahan", "kesalahan", "kesalahan"], correctAnswer: 0, rationale: "Bentukan kata benda yang benar dari 'salah' adalah 'kesalahan'.", hint: "Perhatikan kaidah penulisan huruf kapital." },
+    { id: 76, text: "Penulisan afiksasi yang benar dari kata dasar 'salah' dengan prefiks *ke-* dan sufiks *-an* adalah...", options: ["kesalahan", "disalahkan", "afiksasi", "bersalah"], correctAnswer: 0, rationale: "Bentukan kata benda yang benar dari 'salah' adalah 'kesalahan'.", hint: "Perhatikan kaidah penulisan huruf kapital." },
     { id: 77, text: "Kata depan yang benar dalam kalimat 'Dia berjalan ... toko buku.' adalah...", options: ["ketoko", "ke toko", "ke-toko", "ketoko buku"], correctAnswer: 1, rationale: "Kata depan 'ke' (menunjukkan tempat) harus ditulis terpisah dari kata yang mengikutinya.", hint: "Kata depan dipisah, imbuhan digabung." },
     { id: 78, text: "Manakah penulisan kata 'di' sebagai kata depan yang benar?", options: ["Disana", "Dibawah", "Di atas", "Diperoleh"], correctAnswer: 2, rationale: "'Di atas' menunjukkan tempat dan harus dipisah. 'Disana' (seharusnya 'di sana'), 'Dibawah' (seharusnya 'di bawah'), dan 'Diperoleh' (imbuhan, harus digabung) salah.", hint: "Kata 'di' yang menunjukkan tempat harus dipisah." },
     { id: 79, text: "Kalimat yang menggunakan majas Hiperbola (melebih-lebihkan) adalah...", options: ["Wajahnya cantik seperti bidadari.", "Suara merdunya memecahkan gendang telinga.", "Dia adalah pahlawan tanpa tanda jasa.", "Penjahat itu tertangkap basah."], correctAnswer: 1, rationale: "Memecahkan gendang telinga adalah pernyataan yang sangat berlebihan untuk menggambarkan suara yang sangat keras.", hint: "Cari pernyataan yang tidak mungkin secara logis." },
@@ -206,3 +206,4 @@ const allQuestions = [
         hint: "Nomina dapat didahului oleh kata sandang 'si' atau 'sang' atau diiringi oleh sufiks posesif seperti '-nya'."
     }
 ];
+
